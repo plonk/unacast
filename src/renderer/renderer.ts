@@ -250,7 +250,14 @@ const buildConfigJson = () => {
   const minDisplayTime = parseFloat((document.getElementById('min-display-time') as any).value);
   // 本文改行設定
   const newLine = (document.getElementById('enableNewLine') as any).checked === true;
-  // SEパス
+
+  // アイコンパス
+  const iconDirBbs = (document.getElementById('icon_dir_bbs') as HTMLInputElement).value.trim();
+  const iconDirYoutube = (document.getElementById('icon_dir_youtube') as HTMLInputElement).value.trim();
+  const iconDirTwitch = (document.getElementById('icon_dir_twitch') as HTMLInputElement).value.trim();
+  const iconDirNiconico = (document.getElementById('icon_dir_niconico') as HTMLInputElement).value.trim();
+
+  // SE再生設定
   const playSe = (document.getElementById('checkbox-playSe') as any).checked === true;
   const playSeVolume = parseInt((document.getElementById('playSe-volume') as HTMLInputElement).value);
 
@@ -351,6 +358,10 @@ const buildConfigJson = () => {
     hideImgUrl,
     emoteAnimation,
     emoteSize,
+    iconDirBbs,
+    iconDirYoutube,
+    iconDirTwitch,
+    iconDirNiconico,
     sePath,
     playSe,
     playSeVolume,
@@ -410,6 +421,10 @@ const loadConfigToLocalStrage = async () => {
     hideImgUrl: false,
     emoteAnimation: false,
     emoteSize: 1,
+    iconDirBbs: '',
+    iconDirYoutube: '',
+    iconDirTwitch: '',
+    iconDirNiconico: '',
     sePath: '',
     playSeVolume: 100,
     playSe: false,
@@ -446,21 +461,6 @@ const loadConfigToLocalStrage = async () => {
     ...initConfig,
     ...storageJson,
   };
-
-  // 使用可能なデバイスの一覧を取得
-  const devices = await navigator.mediaDevices.enumerateDevices();
-  const audiooutput = devices.filter((device) => device.kind === 'audiooutput');
-  log.info(audiooutput);
-  audiooutput.map((val) => {
-    const checkedStr = globalThis.config.audioOutputDevices.includes(val.deviceId) ? 'checked' : '';
-    const domstr = `
-  <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="audioOutputDevices_${val.deviceId}">
-    <input type="checkbox" id="audioOutputDevices_${val.deviceId}" name="audioOutputDevices" class="mdl-checkbox__input" ${checkedStr} />
-    <span class="mdl-checkbox__label">${val.label}</span>
-  </label>
-    `;
-    (document.getElementById('audioOutputDevices') as any).insertAdjacentHTML('afterbegin', domstr);
-  });
 
   // 表示に反映する
   // アイコン表示初期化
@@ -514,6 +514,12 @@ const loadConfigToLocalStrage = async () => {
 
   (document.getElementById('yomiko-replace-newline') as any).checked == config.yomikoReplaceNewline;
 
+  // Iconパス
+  (document.getElementById('icon_dir_bbs') as any).value = config.iconDirBbs;
+  (document.getElementById('icon_dir_youtube') as any).value = config.iconDirYoutube;
+  (document.getElementById('icon_dir_twitch') as any).value = config.iconDirTwitch;
+  (document.getElementById('icon_dir_niconico') as any).value = config.iconDirNiconico;
+
   // 読み子の種類
   switch (config.typeYomiko) {
     case 'none':
@@ -559,6 +565,23 @@ const loadConfigToLocalStrage = async () => {
   // 翻訳
   (document.getElementById('translate_enable') as any).checked = config.translate.enable;
   (document.getElementById('translate_targetLang') as HTMLSelectElement).value = config.translate.targetLang;
+
+  // --------------------この下の処理でラジオボタンの処理が動かなくなるので、何か足す時はここより上に追記すること------------------------------
+
+  // 使用可能なデバイスの一覧を取得
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const audiooutput = devices.filter((device) => device.kind === 'audiooutput');
+  // log.info(audiooutput);
+  audiooutput.map((val) => {
+    const checkedStr = globalThis.config.audioOutputDevices.includes(val.deviceId) ? 'checked' : '';
+    const domstr = `
+  <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="audioOutputDevices_${val.deviceId}">
+    <input type="checkbox" id="audioOutputDevices_${val.deviceId}" name="audioOutputDevices" class="mdl-checkbox__input" ${checkedStr} />
+    <span class="mdl-checkbox__label">${val.label}</span>
+  </label>
+    `;
+    (document.getElementById('audioOutputDevices') as HTMLDivElement).insertAdjacentHTML('afterbegin', domstr);
+  });
 
   log.debug('config loaded');
 };

@@ -3,6 +3,7 @@ import { ChatClient } from 'dank-twitch-irc';
 import { LiveChat } from '../main/youtube-chat';
 import NiconamaComment from '../main/niconama';
 import JpnknFast from '../main/jpnkn';
+import CommentIcons from '../main/CommentIcons';
 
 declare global {
   namespace electron {
@@ -10,6 +11,8 @@ declare global {
     let chatWindow: BrowserWindow;
     let translateWindow: BrowserWindow;
     let imagePreviewWindow: BrowserWindow;
+
+    let iconList: CommentIcons;
 
     /** SEファイルリスト */
     let seList: string[];
@@ -87,10 +90,20 @@ declare global {
      * - 2: チャットウィンドウとサーバに表示
      */
     let thumbnail: 0 | 1 | 2;
+    /** 画像URLの非表示化 */
     let hideImgUrl: boolean;
     /** エモートの表示設定 */
     let emoteAnimation: boolean;
+    /** エモートサイズ */
     let emoteSize: 1 | 2 | 3;
+    /** iconのパス bbs */
+    let iconDirBbs: string;
+    /** iconのパス Youtube */
+    let iconDirYoutube: string;
+    /** iconのパス Twitch */
+    let iconDirTwitch: string;
+    /** iconのパス niconico */
+    let iconDirNiconico: string;
     /** レス着信音のパス */
     let sePath: string;
     /** レス着信音再生 */

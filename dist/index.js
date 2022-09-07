@@ -86,10 +86,10 @@
 /************************************************************************/
 /******/ ({
 
-/***/ "./src/main/ReadIcons.ts":
-/*!*******************************!*\
-  !*** ./src/main/ReadIcons.ts ***!
-  \*******************************/
+/***/ "./src/main/CommentIcons.ts":
+/*!**********************************!*\
+  !*** ./src/main/CommentIcons.ts ***!
+  \**********************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -101,52 +101,116 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * アイコン表示に関するモジュール
- * シングルトン
  */
 var fs_1 = __importDefault(__webpack_require__(/*! fs */ "fs"));
 var path_1 = __importDefault(__webpack_require__(/*! path */ "path"));
 var electron_log_1 = __importDefault(__webpack_require__(/*! electron-log */ "electron-log"));
 var log = electron_log_1.default.scope('ReadIcons');
-var randomIconList;
-var idIconList;
-/**
- * コンストラクタ
- * ・ランダムフォルダからアイコン名を取得してリスト化
- * ・IDフォルダからもリスト化、空の対応マップ作製
- * ・コテハン対応ファイルを読みこんでmapに格納
- */
-var ReadIcons = /** @class */ (function () {
-    function ReadIcons() {
-        /**
-         * アイコンランダム表示機能（デフォルト）
-         * 起動時に作成したアイコンリストからランダムで1つ取得
-         */
-        this.getRandomIcons = function () {
-            var iconPath = '';
+var CommentIcons = /** @class */ (function () {
+    function CommentIcons(arg) {
+        var _this = this;
+        this.bbsIconList = [];
+        this.youtubeIconList = [];
+        this.twitchIconList = [path_1.default.resolve(__dirname, "../public/img/twitch.png")];
+        this.niconicoIconList = [path_1.default.resolve(__dirname, "../public/img/niconico.png")];
+        // /**
+        //  * アイコンランダム表示機能（デフォルト）
+        //  * 起動時に作成したアイコンリストからランダムで1つ取得
+        //  */
+        // getRandomIcons = () => {
+        //   let iconPath = '';
+        //   try {
+        //     const dirName = './img/random/';
+        //     // リストからランダム取得
+        //     //  const size = randomIconList.size;
+        //     const num = Math.floor(bbsIconList.length * Math.random());
+        //     iconPath = dirName + bbsIconList[num];
+        //   } catch (e) {
+        //     log.error(e);
+        //   }
+        //   return iconPath;
+        // };
+        this.getBbs = function () {
+            var icon = '';
             try {
-                var dirName = './img/random/';
-                // リストからランダム取得
-                //  const size = randomIconList.size;
-                var num = Math.floor(randomIconList.length * Math.random());
-                iconPath = dirName + randomIconList[num];
+                var num = Math.floor(_this.bbsIconList.length * Math.random());
+                var iconPath = _this.bbsIconList[num];
+                icon = fs_1.default.readFileSync(iconPath, { encoding: 'base64' });
             }
             catch (e) {
                 log.error(e);
             }
-            return iconPath;
+            return icon;
         };
-        //画像ディレクトリ
-        var randomDir = path_1.default.resolve(__dirname, "../public/img/random/");
+        this.getYoutube = function () {
+            var icon = '';
+            try {
+                var num = Math.floor(_this.youtubeIconList.length * Math.random());
+                var iconPath = _this.youtubeIconList[num];
+                icon = fs_1.default.readFileSync(iconPath, { encoding: 'base64' });
+            }
+            catch (e) {
+                log.error(e);
+            }
+            return icon;
+        };
+        this.getYoutubeLogo = function () {
+            var icon = '';
+            try {
+                var iconPath = path_1.default.resolve(__dirname, "../public/img/youtube.png");
+                icon = fs_1.default.readFileSync(iconPath, { encoding: 'base64' });
+            }
+            catch (e) {
+                log.error(e);
+            }
+            return icon;
+        };
+        this.getTwitch = function () {
+            var icon = '';
+            try {
+                var num = Math.floor(_this.twitchIconList.length * Math.random());
+                var iconPath = _this.twitchIconList[num];
+                icon = fs_1.default.readFileSync(iconPath, { encoding: 'base64' });
+            }
+            catch (e) {
+                log.error(e);
+            }
+            return icon;
+        };
+        this.getNiconico = function () {
+            var icon = '';
+            try {
+                var num = Math.floor(_this.niconicoIconList.length * Math.random());
+                var iconPath = _this.niconicoIconList[num];
+                icon = fs_1.default.readFileSync(iconPath, { encoding: 'base64' });
+            }
+            catch (e) {
+                log.error(e);
+            }
+            return icon;
+        };
+        var randomDir = fs_1.default.existsSync(arg.bbs) ? arg.bbs : path_1.default.resolve(__dirname, "../public/img/random/");
         log.debug('loadRandomDir = ' + randomDir);
-        //  ランダムアイコン取得
-        randomIconList = readDir(randomDir);
-        // ID用アイコンディレクトリ(未使用)
-        var idDir = path_1.default.resolve(__dirname, "../public/img/id/");
-        log.debug('loadIDDir = ' + idDir);
-        //  ランダムアイコン取得
-        idIconList = readDir(idDir);
+        this.bbsIconList = readDir(randomDir);
+        if (fs_1.default.existsSync(arg.youtube)) {
+            this.youtubeIconList = readDir(arg.youtube);
+        }
+        if (fs_1.default.existsSync(arg.twitch)) {
+            var list = readDir(arg.twitch);
+            if (list.length > 0)
+                this.twitchIconList = list;
+        }
+        if (fs_1.default.existsSync(arg.niconico)) {
+            var list = readDir(arg.niconico);
+            if (list.length > 0)
+                this.niconicoIconList = list;
+        }
+        log.debug(this.bbsIconList);
+        log.debug(this.youtubeIconList);
+        log.debug(this.twitchIconList);
+        log.debug(this.niconicoIconList);
     }
-    return ReadIcons;
+    return CommentIcons;
 }());
 var readDir = function (imgDir) {
     var iconFileList = [];
@@ -158,12 +222,12 @@ var readDir = function (imgDir) {
         var target = typeof file.name !== 'string' ? file : file.name;
         var regx = /.*\.png$/.test(target);
         if (regx) {
-            iconFileList.push(target);
+            iconFileList.push(path_1.default.join(imgDir, target));
         }
     });
     return iconFileList;
 };
-exports.default = new ReadIcons();
+exports.default = CommentIcons;
 
 
 /***/ }),
@@ -399,7 +463,6 @@ var body_parser_1 = __importDefault(__webpack_require__(/*! body-parser */ "body
 var router = express_1.default.Router();
 var electron_log_1 = __importDefault(__webpack_require__(/*! electron-log */ "electron-log"));
 var log = electron_log_1.default.scope('bbs');
-var ReadIcons_1 = __importDefault(__webpack_require__(/*! ./ReadIcons */ "./src/main/ReadIcons.ts")); //アイコンファイル名取得
 var startServer_1 = __webpack_require__(/*! ./startServer */ "./src/main/startServer.ts");
 var util_1 = __webpack_require__(/*! ./util */ "./src/main/util.ts");
 var readSitaraba_1 = __importStar(__webpack_require__(/*! ./readBBS/readSitaraba */ "./src/main/readBBS/readSitaraba.ts")); // したらば読み込み用モジュール
@@ -457,7 +520,7 @@ var getRes = function (threadUrl, resNum) { return __awaiter(void 0, void 0, voi
                 globalThis.electron.threadConnectionError = 0;
                 log.info("fetch " + threadUrl + " resNum = " + resNum + ", result = " + response.length + " lastResNum=" + (response.length > 0 ? response[response.length - 1].number : '-'));
                 return [2 /*return*/, response.map(function (res) {
-                        return __assign(__assign({}, res), { imgUrl: ReadIcons_1.default.getRandomIcons() });
+                        return __assign(__assign({}, res), { imgUrl: globalThis.electron.iconList.getBbs() });
                     })];
             case 2:
                 e_1 = _a.sent();
@@ -702,7 +765,6 @@ var events_1 = __webpack_require__(/*! events */ "events");
 var paho_mqtt_1 = __importDefault(__webpack_require__(/*! paho-mqtt */ "paho-mqtt"));
 var electron_log_1 = __importDefault(__webpack_require__(/*! electron-log */ "electron-log"));
 var log = electron_log_1.default.scope('jpnkn');
-var ReadIcons_1 = __importDefault(__webpack_require__(/*! ../ReadIcons */ "./src/main/ReadIcons.ts")); //アイコンファイル名取得
 var ws_1 = __importDefault(__webpack_require__(/*! ws */ "ws"));
 global.WebSocket = ws_1.default;
 var JpnknFast = /** @class */ (function (_super) {
@@ -738,7 +800,7 @@ var JpnknFast = /** @class */ (function (_super) {
                         name: res[0],
                         date: res[2],
                         text: res[3],
-                        imgUrl: ReadIcons_1.default.getRandomIcons(),
+                        imgUrl: globalThis.electron.iconList.getBbs(),
                         threadTitle: '',
                         id: '',
                         email: res[1],
@@ -899,6 +961,7 @@ else {
         chatWindow: null,
         translateWindow: null,
         imagePreviewWindow: null,
+        iconList: null,
         seList: [],
         twitchChat: null,
         youtubeChat: null,
@@ -2249,6 +2312,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTranslateDom = exports.sendDom = exports.createDom = exports.findSeList = void 0;
 var path_1 = __importDefault(__webpack_require__(/*! path */ "path"));
 var express_1 = __importDefault(__webpack_require__(/*! express */ "express"));
+var axios_1 = __importDefault(__webpack_require__(/*! axios */ "axios"));
 var cors_1 = __importDefault(__webpack_require__(/*! cors */ "cors"));
 var electron_log_1 = __importDefault(__webpack_require__(/*! electron-log */ "electron-log"));
 var dank_twitch_irc_1 = __webpack_require__(/*! dank-twitch-irc */ "dank-twitch-irc");
@@ -2264,6 +2328,7 @@ var const_1 = __webpack_require__(/*! ./const */ "./src/main/const.ts");
 var niconama_1 = __importDefault(__webpack_require__(/*! ./niconama */ "./src/main/niconama/index.ts"));
 var jpnkn_1 = __importDefault(__webpack_require__(/*! ./jpnkn */ "./src/main/jpnkn/index.ts"));
 var googletrans_1 = __importDefault(__webpack_require__(/*! googletrans */ "googletrans"));
+var CommentIcons_1 = __importDefault(__webpack_require__(/*! ./CommentIcons */ "./src/main/CommentIcons.ts"));
 var app;
 // サーバーをグローバル変数にセットできるようにする（サーバー停止処理のため）
 var server;
@@ -2353,6 +2418,13 @@ electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, confi
         app.use(express_1.default.static(path_1.default.resolve(__dirname, '../public')));
         // 2ch互換掲示板の取得
         app.use('/getRes', getRes_1.default);
+        // iconを設定
+        globalThis.electron.iconList = new CommentIcons_1.default({
+            bbs: globalThis.config.iconDirBbs,
+            youtube: globalThis.config.iconDirYoutube,
+            twitch: globalThis.config.iconDirTwitch,
+            niconico: globalThis.config.iconDirNiconico,
+        });
         // SEを取得する
         if (globalThis.config.sePath) {
             exports.findSeList();
@@ -2388,7 +2460,13 @@ electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, confi
                 });
             });
             nico.on('comment', function (event) {
-                globalThis.electron.commentQueueList.push({ imgUrl: './img/niconico.png', number: event.number, name: event.name, text: event.comment, from: 'niconico' });
+                globalThis.electron.commentQueueList.push({
+                    imgUrl: globalThis.electron.iconList.getNiconico(),
+                    number: event.number,
+                    name: event.name,
+                    text: event.comment,
+                    from: 'niconico',
+                });
                 globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {
                     commentType: 'niconico',
                     category: 'status',
@@ -2423,7 +2501,7 @@ electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, confi
                 });
             });
             jpn.on('comment', function (event) {
-                globalThis.electron.commentQueueList.push(event);
+                globalThis.electron.commentQueueList.push(__assign(__assign({}, event), { imgUrl: globalThis.electron.iconList.getBbs() }));
                 globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {
                     commentType: 'jpnkn',
                     category: 'status',
@@ -2562,7 +2640,7 @@ var startTwitchChat = function () { return __awaiter(void 0, void 0, void 0, fun
                 electron_log_1.default.info('[Twitch] comment received');
                 globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, { commentType: 'twitch', category: 'status', message: 'ok' });
                 // log.info(JSON.stringify(msg, null, '  '));
-                var imgUrl = './img/twitch.png';
+                var imgUrl = globalThis.electron.iconList.getTwitch();
                 var name = util_1.escapeHtml(msg.displayName);
                 var text = util_1.escapeHtml(msg.messageText);
                 // エモートを画像タグにする
@@ -2619,39 +2697,63 @@ var startYoutubeChat = function () { return __awaiter(void 0, void 0, void 0, fu
                 electron_log_1.default.info('[Youtube Chat] disconnect');
                 globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, { commentType: 'youtube', category: 'status', message: 'connection end' });
             });
-            createYoutubeComment_1 = function (comment) {
-                var _a, _b;
-                // log.info(JSON.stringify(comment, null, '  '));
-                var imgUrl = (_b = (_a = comment.author.thumbnail) === null || _a === void 0 ? void 0 : _a.url) !== null && _b !== void 0 ? _b : '';
-                var name = util_1.escapeHtml(comment.author.name);
-                // 絵文字と結合する
-                var text = '';
-                for (var _i = 0, _c = comment.message; _i < _c.length; _i++) {
-                    var message = _c[_i];
-                    var txtItem = message.text;
-                    if (txtItem) {
-                        text += util_1.escapeHtml(txtItem);
+            createYoutubeComment_1 = function (comment) { return __awaiter(void 0, void 0, void 0, function () {
+                var icon, thumbnail, thumbnailImgBuf, b64, e_2, imgUrl, name, text, _i, _a, message, txtItem, imageItem;
+                var _b, _c;
+                return __generator(this, function (_d) {
+                    switch (_d.label) {
+                        case 0:
+                            icon = globalThis.electron.iconList.getYoutube();
+                            thumbnail = (_c = (_b = comment.author.thumbnail) === null || _b === void 0 ? void 0 : _b.url) !== null && _c !== void 0 ? _c : '';
+                            if (!(!icon && thumbnail)) return [3 /*break*/, 4];
+                            _d.label = 1;
+                        case 1:
+                            _d.trys.push([1, 3, , 4]);
+                            return [4 /*yield*/, axios_1.default.get(thumbnail, { responseType: 'arraybuffer' })];
+                        case 2:
+                            thumbnailImgBuf = _d.sent();
+                            b64 = Buffer.from(thumbnailImgBuf.data).toString('base64');
+                            icon = b64;
+                            return [3 /*break*/, 4];
+                        case 3:
+                            e_2 = _d.sent();
+                            electron_log_1.default.warn(e_2);
+                            return [3 /*break*/, 4];
+                        case 4:
+                            if (!icon) {
+                                icon = globalThis.electron.iconList.getYoutubeLogo();
+                            }
+                            imgUrl = icon;
+                            name = util_1.escapeHtml(comment.author.name);
+                            text = '';
+                            for (_i = 0, _a = comment.message; _i < _a.length; _i++) {
+                                message = _a[_i];
+                                txtItem = message.text;
+                                if (txtItem) {
+                                    text += util_1.escapeHtml(txtItem);
+                                }
+                                else {
+                                    imageItem = message;
+                                    text += "<img src=\"" + imageItem.url + "\" width=\"" + 24 + "\" height=\"" + 24 + "\" />";
+                                }
+                            }
+                            // const text = escapeHtml((comment.message[0] as any).text);
+                            return [2 /*return*/, { imgUrl: imgUrl, name: name, text: text, from: 'youtube' }];
                     }
-                    else {
-                        var imageItem = message;
-                        text += "<img src=\"" + imageItem.url + "\" width=\"" + 24 + "\" height=\"" + 24 + "\" />";
-                    }
-                }
-                // const text = escapeHtml((comment.message[0] as any).text);
-                return { imgUrl: imgUrl, name: name, text: text, from: 'youtube' };
-            };
+                });
+            }); };
             // 初期チャット受信
             globalThis.electron.youtubeChat.on('firstComment', function (comment) {
                 electron_log_1.default.info('[Youtube] comment received');
                 globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, { commentType: 'youtube', category: 'status', message: 'ok' });
                 // チャットウィンドウだけに出力
-                sendDomForChatWindow([createYoutubeComment_1(comment)]);
+                createYoutubeComment_1(comment).then(function (data) { return sendDomForChatWindow([data]); });
             });
             // チャット受信
             globalThis.electron.youtubeChat.on('comment', function (comment) {
                 electron_log_1.default.info('[Youtube] comment received');
                 globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, { commentType: 'youtube', category: 'status', message: 'ok' });
-                globalThis.electron.commentQueueList.push(createYoutubeComment_1(comment));
+                createYoutubeComment_1(comment).then(function (data) { return globalThis.electron.commentQueueList.push(data); });
             });
             // 何かエラーがあった
             globalThis.electron.youtubeChat.on('error', function (err) {
@@ -2992,7 +3094,7 @@ var createDom = function (message, type, isAA) {
     var isResNameShowed = false;
     // アイコン表示
     if (globalThis.config.showIcon) {
-        domStr += "\n    <span class=\"icon-block\">\n      <img class=\"icon\" src=\"" + message.imgUrl + "\">\n    </span>\n    ";
+        domStr += "\n    <span class=\"icon-block\">\n      <img class=\"icon\" src=\"data:image/png;base64," + message.imgUrl + "\">\n    </span>\n    ";
         isResNameShowed = true;
     }
     domStr += "<div class=\"content\">";
@@ -3081,7 +3183,7 @@ exports.createDom = createDom;
  * @param message
  */
 var sendDom = function (messageList) { return __awaiter(void 0, void 0, void 0, function () {
-    var newList, domStr, socketObject_1, text, e_2;
+    var newList, domStr, socketObject_1, text, e_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -3134,8 +3236,8 @@ var sendDom = function (messageList) { return __awaiter(void 0, void 0, void 0, 
                 resetInitMessage();
                 return [3 /*break*/, 10];
             case 9:
-                e_2 = _a.sent();
-                electron_log_1.default.error(e_2);
+                e_3 = _a.sent();
+                electron_log_1.default.error(e_3);
                 return [3 /*break*/, 10];
             case 10: return [2 /*return*/];
         }
@@ -3202,7 +3304,7 @@ var createTranslateDom = function (message, translated) {
 exports.createTranslateDom = createTranslateDom;
 /** 翻訳ウィンドウへのコメント表示 */
 var sendDomForTranslateWindow = function (message) { return __awaiter(void 0, void 0, void 0, function () {
-    var reg, orgText, translated, domStr, e_3;
+    var reg, orgText, translated, domStr, e_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -3234,8 +3336,8 @@ var sendDomForTranslateWindow = function (message) { return __awaiter(void 0, vo
                 globalThis.electron.translateWindow.webContents.send(const_1.electronEvent.SHOW_COMMENT_TL, { config: globalThis.config, dom: domStr });
                 return [3 /*break*/, 4];
             case 3:
-                e_3 = _a.sent();
-                electron_log_1.default.error(JSON.stringify(e_3));
+                e_4 = _a.sent();
+                electron_log_1.default.error(JSON.stringify(e_4));
                 globalThis.electron.translateWindow.webContents.send(const_1.electronEvent.SHOW_COMMENT_TL, { config: globalThis.config, dom: '<div>翻訳でエラー</div>' });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];

@@ -38,6 +38,7 @@ if (!app.requestSingleInstanceLock()) {
     chatWindow: null as any,
     translateWindow: null as any,
     imagePreviewWindow: null as any,
+    iconList: null as any,
     seList: [],
     twitchChat: null as any,
     youtubeChat: null as any,

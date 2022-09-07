@@ -1,6 +1,7 @@
 import http from 'http';
 import path from 'path';
 import express, { Request, Response } from 'express';
+import axios from 'axios';
 import cors from 'cors';
 import log from 'electron-log';
 import { ChatClient } from 'dank-twitch-irc';
@@ -17,6 +18,7 @@ import { electronEvent } from './const';
 import NiconamaComment from './niconama';
 import JpnknFast from './jpnkn';
 import tr from 'googletrans';
+import CommentIcons from './CommentIcons';
 
 let app: expressWs.Instance['app'];
 
@@ -119,6 +121,14 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
   // 2ch互換掲示板の取得
   app.use('/getRes', getRes);
 
+  // iconを設定
+  globalThis.electron.iconList = new CommentIcons({
+    bbs: globalThis.config.iconDirBbs,
+    youtube: globalThis.config.iconDirYoutube,
+    twitch: globalThis.config.iconDirTwitch,
+    niconico: globalThis.config.iconDirNiconico,
+  });
+
   // SEを取得する
   if (globalThis.config.sePath) {
     findSeList();
@@ -160,7 +170,13 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
     });
 
     nico.on('comment', (event) => {
-      globalThis.electron.commentQueueList.push({ imgUrl: './img/niconico.png', number: event.number, name: event.name, text: event.comment, from: 'niconico' });
+      globalThis.electron.commentQueueList.push({
+        imgUrl: globalThis.electron.iconList.getNiconico(),
+        number: event.number,
+        name: event.name,
+        text: event.comment,
+        from: 'niconico',
+      });
       globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
         commentType: 'niconico',
         category: 'status',
@@ -198,7 +214,7 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
     });
 
     jpn.on('comment', (event) => {
-      globalThis.electron.commentQueueList.push(event);
+      globalThis.electron.commentQueueList.push({ ...event, imgUrl: globalThis.electron.iconList.getBbs() });
       globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
         commentType: 'jpnkn',
         category: 'status',
@@ -326,7 +342,7 @@ const startTwitchChat = async () => {
       globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, { commentType: 'twitch', category: 'status', message: 'ok' });
 
       // log.info(JSON.stringify(msg, null, '  '));
-      const imgUrl = './img/twitch.png';
+      const imgUrl = globalThis.electron.iconList.getTwitch();
       const name = escapeHtml(msg.displayName);
       let text = escapeHtml(msg.messageText);
       // エモートを画像タグにする
@@ -382,9 +398,23 @@ const startYoutubeChat = async () => {
       globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, { commentType: 'youtube', category: 'status', message: 'connection end' });
     });
 
-    const createYoutubeComment = (comment: CommentItem): UserComment => {
+    const createYoutubeComment = async (comment: CommentItem): Promise<UserComment> => {
       // log.info(JSON.stringify(comment, null, '  '));
-      const imgUrl = comment.author.thumbnail?.url ?? '';
+      let icon: string = globalThis.electron.iconList.getYoutube();
+      const thumbnail = comment.author.thumbnail?.url ?? '';
+      if (!icon && thumbnail) {
+        try {
+          const thumbnailImgBuf = await axios.get<ArrayBuffer>(thumbnail, { responseType: 'arraybuffer' });
+          const b64 = Buffer.from(thumbnailImgBuf.data).toString('base64');
+          icon = b64;
+        } catch (e) {
+          log.warn(e);
+        }
+      }
+      if (!icon) {
+        icon = globalThis.electron.iconList.getYoutubeLogo();
+      }
+      const imgUrl = icon;
       const name = escapeHtml(comment.author.name);
       // 絵文字と結合する
       let text = '';
@@ -405,14 +435,14 @@ const startYoutubeChat = async () => {
       log.info('[Youtube] comment received');
       globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, { commentType: 'youtube', category: 'status', message: 'ok' });
       // チャットウィンドウだけに出力
-      sendDomForChatWindow([createYoutubeComment(comment)]);
+      createYoutubeComment(comment).then((data) => sendDomForChatWindow([data]));
     });
 
     // チャット受信
     globalThis.electron.youtubeChat.on('comment', (comment: CommentItem) => {
       log.info('[Youtube] comment received');
       globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, { commentType: 'youtube', category: 'status', message: 'ok' });
-      globalThis.electron.commentQueueList.push(createYoutubeComment(comment));
+      createYoutubeComment(comment).then((data) => globalThis.electron.commentQueueList.push(data));
     });
 
     // 何かエラーがあった
@@ -699,7 +729,7 @@ export const createDom = (message: UserComment, type: 'chat' | 'server', isAA: b
   if (globalThis.config.showIcon) {
     domStr += `
     <span class="icon-block">
-      <img class="icon" src="${message.imgUrl}">
+      <img class="icon" src="data:image/png;base64,${message.imgUrl}">
     </span>
     `;
     isResNameShowed = true;

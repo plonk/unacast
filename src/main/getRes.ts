@@ -5,7 +5,6 @@ import bodyParser from 'body-parser'; // jsonパーサ
 const router = express.Router();
 import electronlog from 'electron-log';
 const log = electronlog.scope('bbs');
-import readIcons from './ReadIcons'; //アイコンファイル名取得
 
 import { createDom } from './startServer';
 import { judgeAaMessage } from './util';
@@ -63,7 +62,7 @@ export const getRes = async (threadUrl: string, resNum: number): Promise<UserCom
     return response.map((res) => {
       return {
         ...res,
-        imgUrl: readIcons.getRandomIcons(),
+        imgUrl: globalThis.electron.iconList.getBbs(),
       };
     });
   } catch (e) {

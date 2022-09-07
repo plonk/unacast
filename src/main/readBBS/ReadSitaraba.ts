@@ -8,7 +8,6 @@ import electronlog from 'electron-log';
 const log = electronlog.scope('bbs');
 export type ShitarabaResponse = ReturnType<typeof purseResponse>;
 import encoding from 'encoding-japanese';
-import { json } from 'body-parser';
 
 /** スレ一覧を読み込む */
 export const readBoard = async (boardUrl: string) => {

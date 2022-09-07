@@ -5,7 +5,6 @@ import { EventEmitter } from 'events';
 import pahoMqtt from 'paho-mqtt';
 import electronlog from 'electron-log';
 const log = electronlog.scope('jpnkn');
-import readIcons from '../ReadIcons'; //アイコンファイル名取得
 import WebSocket from 'ws';
 
 (global as any).WebSocket = WebSocket;
@@ -91,7 +90,7 @@ class JpnknFast extends EventEmitter {
         name: res[0],
         date: res[2],
         text: res[3],
-        imgUrl: readIcons.getRandomIcons(),
+        imgUrl: globalThis.electron.iconList.getBbs(),
         threadTitle: '',
         id: '',
         email: res[1],
