@@ -52,9 +52,11 @@ export const unescapeHtml = (str: string) => {
 export const judgeAaMessage = (messageList: UserComment[]) => {
   return messageList.map((message) => {
     let isAA = false;
-    if (config.aamode.condition.length <= message.text.length) isAA = true;
-    for (const word of config.aamode.condition.words) {
-      if (message.text.includes(word)) isAA = true;
+    if (config.aamode.enable) {
+      if (config.aamode.condition.length <= message.text.length) isAA = true;
+      for (const word of config.aamode.condition.words) {
+        if (message.text.includes(word)) isAA = true;
+      }
     }
 
     return {

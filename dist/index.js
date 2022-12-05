@@ -3434,12 +3434,14 @@ exports.unescapeHtml = unescapeHtml;
 var judgeAaMessage = function (messageList) {
     return messageList.map(function (message) {
         var isAA = false;
-        if (config.aamode.condition.length <= message.text.length)
-            isAA = true;
-        for (var _i = 0, _a = config.aamode.condition.words; _i < _a.length; _i++) {
-            var word = _a[_i];
-            if (message.text.includes(word))
+        if (config.aamode.enable) {
+            if (config.aamode.condition.length <= message.text.length)
                 isAA = true;
+            for (var _i = 0, _a = config.aamode.condition.words; _i < _a.length; _i++) {
+                var word = _a[_i];
+                if (message.text.includes(word))
+                    isAA = true;
+            }
         }
         return __assign(__assign({}, message), { isAA: isAA });
     });
