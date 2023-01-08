@@ -203,6 +203,12 @@ const toggleInputFormDisable = (isDisabled: boolean) => {
 
   (document.getElementById('checkbox-wordBreak') as any).disabled = isDisabled;
   (document.getElementById('checkbox-wordBreak') as any).parentNode.style.backgroundColor = isDisabled ? 'lightgray' : '';
+
+  (document.getElementById('azureStt-enable') as HTMLInputElement).disabled = isDisabled;
+  (document.getElementById('azureStt-name') as HTMLInputElement).disabled = isDisabled;
+  (document.getElementById('azureStt-key') as HTMLInputElement).disabled = isDisabled;
+  (document.getElementById('azureStt-region') as HTMLInputElement).disabled = isDisabled;
+  (document.getElementById('azureStt-language') as HTMLInputElement).disabled = isDisabled;
 };
 
 /**
@@ -228,6 +234,15 @@ const buildConfigJson = () => {
   const bouyomiVolume = parseInt((document.getElementById('bouyomi-volume') as HTMLInputElement).value);
   const bouyomiPrefix = (document.getElementById('text-bouyomi-prefix') as HTMLInputElement).value;
   const yomikoReplaceNewline = (document.getElementById('yomiko-replace-newline') as any).checked === true;
+
+  // Azure Text To Speect
+  const azureStt: typeof globalThis['config']['azureStt'] = {
+    enable: (document.getElementById('azureStt-enable') as any).checked === true,
+    name: (document.getElementById('azureStt-name') as HTMLInputElement).value,
+    key: (document.getElementById('azureStt-key') as HTMLInputElement).value,
+    region: (document.getElementById('azureStt-region') as HTMLInputElement).value,
+    language: ((document.getElementById('azureStt-language') as HTMLSelectElement).value as typeof globalThis['config']['azureStt']['language']) ?? 'ja-JP',
+  };
 
   const notifyThreadConnectionErrorLimit = parseInt((document.getElementById('text-notify-threadConnectionErrorLimit') as HTMLInputElement).value);
   const notifyThreadResLimit = parseInt((document.getElementById('text-notify-threadResLimit') as HTMLInputElement).value);
@@ -377,6 +392,7 @@ const buildConfigJson = () => {
     commentProcessType,
     dispType,
     aamode,
+    azureStt,
     translate,
     audioOutputDevices,
   };
@@ -450,6 +466,13 @@ const loadConfigToLocalStrage = async () => {
     translate: {
       enable: true,
       targetLang: 'ja',
+    },
+    azureStt: {
+      enable: true,
+      name: "",
+      key: "",
+      region: "",
+      language: "ja-JP",
     },
     audioOutputDevices: ['default'],
   };
@@ -566,6 +589,13 @@ const loadConfigToLocalStrage = async () => {
   (document.getElementById('translate_enable') as any).checked = config.translate.enable;
   (document.getElementById('translate_targetLang') as HTMLSelectElement).value = config.translate.targetLang;
 
+  // Azure Text To Speech
+  (document.getElementById('azureStt-enable') as any).checked = config.azureStt.enable;
+  (document.getElementById('azureStt-name') as any).value = config.azureStt.name;
+  (document.getElementById('azureStt-key') as any).value = config.azureStt.key;
+  (document.getElementById('azureStt-region') as any).value = config.azureStt.region;
+  (document.getElementById('azureStt-language') as any).value = config.azureStt.language;
+
   // --------------------この下の処理でラジオボタンの処理が動かなくなるので、何か足す時はここより上に追記すること------------------------------
 
   // 使用可能なデバイスの一覧を取得
@@ -651,7 +681,7 @@ ipcRenderer.on(electronEvent.SHOW_ALERT, async (event: any, args: string) => {
 });
 
 // 何かしら通知したいことがあったら表示する
-ipcRenderer.on(electronEvent.UPDATE_STATUS, async (event: any, args: { commentType: 'bbs' | 'jpnkn' | 'youtube' | 'twitch' | 'niconico'; category: string; message: string }) => {
+ipcRenderer.on(electronEvent.UPDATE_STATUS, async (event: any, args: { commentType: 'bbs' | 'jpnkn' | 'youtube' | 'twitch' | 'niconico' | 'stt'; category: string; message: string }) => {
   log.debug(`[UPDATE_STATUS] commentType = ${args.commentType} category = ${args.category}`);
   switch (args.commentType) {
     case 'bbs': {
@@ -686,6 +716,12 @@ ipcRenderer.on(electronEvent.UPDATE_STATUS, async (event: any, args: { commentTy
       }
       break;
     }
+    case 'stt': {
+      if (args.category === 'status') {
+        (document.getElementById('stt-status') as HTMLElement).innerText = args.message;
+      }
+      break;
+    }
   }
 });
 
@@ -697,3 +733,5 @@ ipcRenderer.on(electronEvent.SAVE_CONFIG, async (event: any, arg: typeof globalT
 ipcRenderer.on(electronEvent.PREVIEW_IMAGE, (event: any, url: string) => {
   window.electron.imagePreviewWindow.webContents.send(electronEvent.PREVIEW_IMAGE, url);
 });
+
+require('./azureStt');

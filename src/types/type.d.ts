@@ -12,7 +12,7 @@ type UserComment = {
   threadTitle?: string;
   id?: string;
   email?: string;
-  from: 'system' | 'bbs' | 'youtube' | 'twitch' | 'niconico' | 'jpnkn';
+  from: 'system' | 'bbs' | 'youtube' | 'twitch' | 'niconico' | 'jpnkn' | 'stt';
 };
 
 type CommentSocketMessage = {

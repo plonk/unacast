@@ -42,4 +42,10 @@ export const electronEvent = {
 
   /** 画像プレビュー */
   PREVIEW_IMAGE: 'PREVIEW_IMAGE',
+
+  /** Azure Speech To text **/
+  AZURE_STT_START: 'azure-stt-start',
+  AZURE_STT_STOP: 'azure-stt-stop',
+  AZURE_STT_EVENT: 'azure-stt-event',
+
 };

@@ -4,6 +4,7 @@ import { LiveChat } from '../main/youtube-chat';
 import NiconamaComment from '../main/niconama';
 import JpnknFast from '../main/jpnkn';
 import CommentIcons from '../main/CommentIcons';
+import AzureSpeechToText from '../main/azureStt';
 
 declare global {
   namespace electron {
@@ -24,6 +25,8 @@ declare global {
     let jpnknFast: JpnknFast;
     /** ニコ生チャットインスタンス */
     let niconicoChat: NiconamaComment;
+    /** Azure Speech To Text */
+    let azureStt: AzureSpeechToText;
     /** 掲示板の読み込み済みのレス番号 */
     let threadNumber: number;
     /** 掲示板との連続通信エラー回数 */
@@ -46,6 +49,20 @@ declare global {
     let twitchId: string;
     /** ニコニココミュニティID */
     let niconicoId: string;
+
+    /** Azure Speech To Text 設定 **/
+    let azureStt: {
+      /** 有効にするかどうか **/
+      enable: boolean;
+      /** サブスクリプションキー **/
+      key: string;
+      /** サブスクリプションリージョン **/
+      region: string;
+      /** 発言者表示名 **/
+      name: string;
+      /** 認識言語 **/
+      language: 'ja-JP' | 'en-US';
+    };
 
     /** 開始レス番号 */
     let resNumber: string;
@@ -158,4 +175,4 @@ declare global {
   }
 }
 
-export {};
+export { };

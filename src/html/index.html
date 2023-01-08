@@ -434,6 +434,43 @@
           </div>
         </div>
 
+
+        <div class="block">
+          <h5>Azureテキスト認識</h5>
+
+          <div class="mdl-textfield mdl-js-textfield" style="width: 100vw;">
+            <div class="caption">Azureを使ってマイクからの音声を認識してレスのように表示します。</div>
+
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="azureStt-enable">
+              <input type="checkbox" id="azureStt-enable" class="mdl-checkbox__input" value="0" checked />
+              <span class="mdl-checkbox__label">有効にする</span>
+            </label>
+
+            <div class="mdl-textfield mdl-js-textfield" style="width: 600px;">
+              <div class="subtitle">発言者名</div>
+              <input class="mdl-textfield__input" type="text" id="azureStt-name" />
+            </div>
+
+            <div class="mdl-textfield mdl-js-textfield" style="width: 600px;">
+              <div class="subtitle">サブスクリプションキー(キー1またはキー2)</div>
+              <input class="mdl-textfield__input" type="password" id="azureStt-key" />
+            </div>
+
+            <div class="mdl-textfield mdl-js-textfield" style="width: 600px;">
+              <div class="subtitle">サブスクリプション場所/地域</div>
+              <input class="mdl-textfield__input" type="text" id="azureStt-region" />
+            </div>
+
+            <div class="subtitle">認識する言語</div>
+            <select id="azureStt-language" value="ja-JP">
+              <option value="ja-JP">日本語</option>
+              <option value="en-US">English</option>
+            </select>
+          </div>
+          <div class="azureSttStatusArea">
+            <span class="status"><span class="status-label">status:</span><span id="stt-status">none</span></span>
+          </div>
+        </div>
       </div>
 
       <div class="block">

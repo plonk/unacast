@@ -44,6 +44,7 @@ if (!app.requestSingleInstanceLock()) {
     youtubeChat: null as any,
     niconicoChat: null as any,
     jpnknFast: null as any,
+    azureStt: null as any,
     threadConnectionError: 0,
     threadNumber: 0,
     commentQueueList: [],

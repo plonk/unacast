@@ -17,6 +17,7 @@ import { spawn } from 'child_process';
 import { electronEvent } from './const';
 import NiconamaComment from './niconama';
 import JpnknFast from './jpnkn';
+import AzureSpeechToText from './azureStt';
 import tr from 'googletrans';
 import CommentIcons from './CommentIcons';
 
@@ -240,6 +241,45 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
     if (config.bouyomiPort) {
       bouyomi = new bouyomiChan({ port: config.bouyomiPort, volume: config.bouyomiVolume, prefix: config.bouyomiPrefix });
     }
+  }
+
+  // Azure SpeechToText
+  if (globalThis.config.azureStt && globalThis.config.azureStt.enable && globalThis.config.azureStt.key && globalThis.config.azureStt.region) {
+    const stt = new AzureSpeechToText(
+      globalThis.config.azureStt.name || "",
+      globalThis.config.azureStt.key,
+      globalThis.config.azureStt.region,
+      globalThis.config.azureStt.language || "ja-JP"
+    );
+    globalThis.electron.azureStt = stt;
+    stt.on('start', () => {
+      globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
+        commentType: 'stt',
+        category: 'status',
+        message: `recognition started`
+      });
+    });
+
+    stt.on('comment', (event) => {
+      globalThis.electron.commentQueueList.push({ ...event, imgUrl: globalThis.electron.iconList.getBbs() });
+      globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
+        commentType: 'stt',
+        category: 'status',
+        message: `ok`,
+      });
+    });
+    // 読み取り終了
+    stt.on('end', () => {
+      globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
+        commentType: 'stt',
+        category: 'status',
+        message: `disconnect`,
+      });
+    });
+    stt.on('error', () => {
+      globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, { commentType: 'stt', category: 'status', message: `error` });
+    });
+    stt.start();
   }
 
   // レス取得定期実行
@@ -504,6 +544,13 @@ ipcMain.on(electronEvent.STOP_SERVER, (event) => {
     globalThis.electron.jpnknFast.stop();
     globalThis.electron.jpnknFast.removeAllListeners();
     globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, { commentType: 'jpnkn', category: 'status', message: `connection end` });
+  }
+
+  // Azure Speech To Textインターフェース
+  if (globalThis.electron.azureStt) {
+    globalThis.electron.azureStt.stop();
+    globalThis.electron.azureStt.removeAllListeners();
+    globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, { commentType: 'stt', category: 'status', message: `connection end` });
   }
 });
 
