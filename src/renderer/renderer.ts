@@ -271,6 +271,7 @@ const buildConfigJson = () => {
   const iconDirYoutube = (document.getElementById('icon_dir_youtube') as HTMLInputElement).value.trim();
   const iconDirTwitch = (document.getElementById('icon_dir_twitch') as HTMLInputElement).value.trim();
   const iconDirNiconico = (document.getElementById('icon_dir_niconico') as HTMLInputElement).value.trim();
+  const iconDirStt = (document.getElementById('icon_dir_stt') as HTMLInputElement).value.trim();
 
   // SE再生設定
   const playSe = (document.getElementById('checkbox-playSe') as any).checked === true;
@@ -385,6 +386,7 @@ const buildConfigJson = () => {
     iconDirYoutube,
     iconDirTwitch,
     iconDirNiconico,
+    iconDirStt,
     sePath,
     playSe,
     playSeStt,
@@ -451,6 +453,7 @@ const loadConfigToLocalStrage = async () => {
     iconDirYoutube: '',
     iconDirTwitch: '',
     iconDirNiconico: '',
+    iconDirStt: '',
     sePath: '',
     playSeVolume: 100,
     playSe: false,
@@ -555,6 +558,7 @@ const loadConfigToLocalStrage = async () => {
   (document.getElementById('icon_dir_youtube') as any).value = config.iconDirYoutube;
   (document.getElementById('icon_dir_twitch') as any).value = config.iconDirTwitch;
   (document.getElementById('icon_dir_niconico') as any).value = config.iconDirNiconico;
+  (document.getElementById('icon_dir_stt') as any).value = config.iconDirStt;
 
   // 読み子の種類
   switch (config.typeYomiko) {

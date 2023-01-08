@@ -128,6 +128,7 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
     youtube: globalThis.config.iconDirYoutube,
     twitch: globalThis.config.iconDirTwitch,
     niconico: globalThis.config.iconDirNiconico,
+    stt: globalThis.config.iconDirStt,
   });
 
   // SEを取得する
@@ -256,12 +257,12 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
       globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
         commentType: 'stt',
         category: 'status',
-        message: `recognition started`
+        message: `started`
       });
     });
 
     stt.on('comment', (event) => {
-      globalThis.electron.commentQueueList.push({ ...event, imgUrl: globalThis.electron.iconList.getBbs() });
+      globalThis.electron.commentQueueList.push({ ...event, imgUrl: globalThis.electron.iconList.getStt() });
       globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
         commentType: 'stt',
         category: 'status',
@@ -273,11 +274,15 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
       globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
         commentType: 'stt',
         category: 'status',
-        message: `disconnect`,
+        message: `stopped`,
       });
     });
     stt.on('error', () => {
-      globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, { commentType: 'stt', category: 'status', message: `error` });
+      globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
+        commentType: 'stt',
+        category: 'status',
+        message: `error`,
+      });
     });
     stt.start();
   }

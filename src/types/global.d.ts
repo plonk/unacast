@@ -121,6 +121,8 @@ declare global {
     let iconDirTwitch: string;
     /** iconのパス niconico */
     let iconDirNiconico: string;
+    /** iconのパス 音声認識 */
+    let iconDirStt: string;
     /** レス着信音のパス */
     let sePath: string;
     /** レス着信音再生 */

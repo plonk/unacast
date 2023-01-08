@@ -113,6 +113,7 @@ var CommentIcons = /** @class */ (function () {
         this.youtubeIconList = [];
         this.twitchIconList = [path_1.default.resolve(__dirname, "../public/img/twitch.png")];
         this.niconicoIconList = [path_1.default.resolve(__dirname, "../public/img/niconico.png")];
+        this.sttIconList = [];
         // /**
         //  * アイコンランダム表示機能（デフォルト）
         //  * 起動時に作成したアイコンリストからランダムで1つ取得
@@ -189,6 +190,20 @@ var CommentIcons = /** @class */ (function () {
             }
             return icon;
         };
+        this.getStt = function () {
+            var icon = '';
+            // 専用アイコンがなければ BBS のアイコンを使う
+            var list = _this.sttIconList.length !== 0 ? _this.sttIconList : _this.bbsIconList;
+            try {
+                var num = Math.floor(list.length * Math.random());
+                var iconPath = list[num];
+                icon = fs_1.default.readFileSync(iconPath, { encoding: 'base64' });
+            }
+            catch (e) {
+                log.error(e);
+            }
+            return icon;
+        };
         var randomDir = fs_1.default.existsSync(arg.bbs) ? arg.bbs : path_1.default.resolve(__dirname, "../public/img/random/");
         log.debug('loadRandomDir = ' + randomDir);
         this.bbsIconList = readDir(randomDir);
@@ -205,10 +220,16 @@ var CommentIcons = /** @class */ (function () {
             if (list.length > 0)
                 this.niconicoIconList = list;
         }
+        if (fs_1.default.existsSync(arg.stt)) {
+            var list = readDir(arg.stt);
+            if (list.length > 0)
+                this.sttIconList = list;
+        }
         log.debug(this.bbsIconList);
         log.debug(this.youtubeIconList);
         log.debug(this.twitchIconList);
         log.debug(this.niconicoIconList);
+        log.debug(this.sttIconList);
     }
     return CommentIcons;
 }());
@@ -2557,6 +2578,7 @@ electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, confi
             youtube: globalThis.config.iconDirYoutube,
             twitch: globalThis.config.iconDirTwitch,
             niconico: globalThis.config.iconDirNiconico,
+            stt: globalThis.config.iconDirStt,
         });
         // SEを取得する
         if (globalThis.config.sePath) {
@@ -2668,11 +2690,11 @@ electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, confi
                 globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {
                     commentType: 'stt',
                     category: 'status',
-                    message: "recognition started"
+                    message: "started"
                 });
             });
             stt.on('comment', function (event) {
-                globalThis.electron.commentQueueList.push(__assign(__assign({}, event), { imgUrl: globalThis.electron.iconList.getBbs() }));
+                globalThis.electron.commentQueueList.push(__assign(__assign({}, event), { imgUrl: globalThis.electron.iconList.getStt() }));
                 globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {
                     commentType: 'stt',
                     category: 'status',
@@ -2684,11 +2706,15 @@ electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, confi
                 globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {
                     commentType: 'stt',
                     category: 'status',
-                    message: "disconnect",
+                    message: "stopped",
                 });
             });
             stt.on('error', function () {
-                globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, { commentType: 'stt', category: 'status', message: "error" });
+                globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {
+                    commentType: 'stt',
+                    category: 'status',
+                    message: "error",
+                });
             });
             stt.start();
         }
