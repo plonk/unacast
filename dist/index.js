@@ -2655,7 +2655,7 @@ electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, confi
             jpn.start();
         }
         // 棒読みちゃん接続
-        if (config.typeYomiko === 'bouyomi') {
+        if (config.typeYomiko === 'bouyomi' || config.typeYomikoStt === 'bouyomi') {
             if (config.bouyomiPort) {
                 bouyomi = new bouyomi_chan_1.default({ port: config.bouyomiPort, volume: config.bouyomiVolume, prefix: config.bouyomiPrefix });
             }
@@ -3202,14 +3202,14 @@ var translateTaskScheduler = function (exeId) { return __awaiter(void 0, void 0,
 /** 読み子によって発話中であるか */
 var isSpeaking = false;
 /** 読み子を再生する */
-var playYomiko = function (msg) { return __awaiter(void 0, void 0, void 0, function () {
+var playYomiko = function (typeYomiko, msg) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 // log.info('[playYomiko] start');
                 isSpeaking = true;
                 // 読み子呼び出し
-                switch (config.typeYomiko) {
+                switch (typeYomiko) {
                     case 'tamiyasu': {
                         electron_log_1.default.debug(config.tamiyasuPath + " \"" + msg + "\"");
                         child_process_1.spawn(config.tamiyasuPath, [msg]);
@@ -3354,11 +3354,11 @@ exports.createDom = createDom;
  * @param message
  */
 var sendDom = function (messageList) { return __awaiter(void 0, void 0, void 0, function () {
-    var newList, domStr, socketObject_1, text, e_3;
+    var newList, domStr, socketObject_1, typeYomiko, text, e_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 9, , 10]);
+                _a.trys.push([0, 12, , 13]);
                 newList = util_1.judgeAaMessage(messageList);
                 domStr = newList.map(function (message) { return exports.createDom(message, 'server', message.isAA); }).join('\n');
                 socketObject_1 = {
@@ -3372,19 +3372,29 @@ var sendDom = function (messageList) { return __awaiter(void 0, void 0, void 0, 
                 }
                 // レンダラーのコメント一覧にも表示
                 sendDomForChatWindow(newList);
-                if (!(config.playSe && globalThis.electron.seList.length > 0)) return [3 /*break*/, 2];
+                if (!(globalThis.electron.seList.length > 0)) return [3 /*break*/, 5];
+                if (!newList.every(function (message) { return message.from === 'stt'; })) return [3 /*break*/, 3];
+                if (!config.playSeStt) return [3 /*break*/, 2];
                 return [4 /*yield*/, playSe()];
             case 1:
                 _a.sent();
                 _a.label = 2;
-            case 2:
-                if (!(globalThis.config.typeYomiko !== 'none')) return [3 /*break*/, 6];
-                if (!(newList[newList.length - 1].isAA && config.aamode.enable)) return [3 /*break*/, 4];
-                return [4 /*yield*/, playYomiko(config.aamode.speakWord)];
+            case 2: return [3 /*break*/, 5];
             case 3:
-                _a.sent();
-                return [3 /*break*/, 6];
+                if (!config.playSe) return [3 /*break*/, 5];
+                return [4 /*yield*/, playSe()];
             case 4:
+                _a.sent();
+                _a.label = 5;
+            case 5:
+                typeYomiko = newList[newList.length - 1].from === 'stt' ? globalThis.config.typeYomikoStt : globalThis.config.typeYomiko;
+                if (!(typeYomiko !== 'none')) return [3 /*break*/, 9];
+                if (!(newList[newList.length - 1].isAA && config.aamode.enable)) return [3 /*break*/, 7];
+                return [4 /*yield*/, playYomiko(typeYomiko, config.aamode.speakWord)];
+            case 6:
+                _a.sent();
+                return [3 /*break*/, 9];
+            case 7:
                 text = newList[newList.length - 1].text.replace(/<br> /g, '\n ').replace(/<br>/g, '\n ');
                 text = text.replace(/<img.*?\/>/g, '');
                 text = text.replace(/<a .*?>/g, '').replace(/<\/a>/g, '');
@@ -3392,25 +3402,25 @@ var sendDom = function (messageList) { return __awaiter(void 0, void 0, void 0, 
                 if (globalThis.config.yomikoReplaceNewline) {
                     text = text.replace(/\r\n/g, ' ').replace(/\n/g, ' ');
                 }
-                return [4 /*yield*/, playYomiko(text)];
-            case 5:
-                _a.sent();
-                _a.label = 6;
-            case 6:
-                if (!(globalThis.config.dispType === 1)) return [3 /*break*/, 8];
-                return [4 /*yield*/, util_1.sleep(globalThis.config.minDisplayTime * 1000)];
-            case 7:
-                _a.sent();
-                _a.label = 8;
+                return [4 /*yield*/, playYomiko(typeYomiko, text)];
             case 8:
+                _a.sent();
+                _a.label = 9;
+            case 9:
+                if (!(globalThis.config.dispType === 1)) return [3 /*break*/, 11];
+                return [4 /*yield*/, util_1.sleep(globalThis.config.minDisplayTime * 1000)];
+            case 10:
+                _a.sent();
+                _a.label = 11;
+            case 11:
                 // 鳴らし終わって読み子が終わった
                 resetInitMessage();
-                return [3 /*break*/, 10];
-            case 9:
+                return [3 /*break*/, 13];
+            case 12:
                 e_3 = _a.sent();
                 electron_log_1.default.error(e_3);
-                return [3 /*break*/, 10];
-            case 10: return [2 /*return*/];
+                return [3 /*break*/, 13];
+            case 13: return [2 /*return*/];
         }
     });
 }); };

@@ -318,6 +318,11 @@
             <span class="mdl-checkbox__label">着信音再生を有効にする</span>
           </label>
 
+          <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-playSeStt">
+            <input type="checkbox" id="checkbox-playSeStt" class="mdl-checkbox__input" value="1" checked />
+            <span class="mdl-checkbox__label">音声認識テキストで着信音再生を有効にする</span>
+          </label>
+
           <div>
             <span class="subtitle">音量</span> <span id="disp-playSe-volume">100</span></p>
             <p style="width: 80%;">
@@ -351,6 +356,24 @@
 
           <label class="mdl-radio mdl-js-radio" for="yomiko_bouyomi">
             <input id="yomiko_bouyomi" class="mdl-radio__button" type="radio" name="typeYomiko" value="bouyomi" />
+            <span class="mdl-radio__label">棒読みちゃん</span>
+          </label>
+        </div>
+
+        <div class="mdl-textfield mdl-js-textfield" style="width: 100vw;">
+          <div class="subtitle">音声認識テキスト読み子の種類</div>
+          <label class="mdl-radio mdl-js-radio" for="yomiko_stt_none">
+            <input id="yomiko_stt_none" class="mdl-radio__button" type="radio" name="typeYomikoStt" value="none" />
+            <span class="mdl-radio__label">使用しない</span>
+          </label>
+
+          <label class="mdl-radio mdl-js-radio" for="yomiko_stt_tamiyasu">
+            <input id="yomiko_stt_tamiyasu" class="mdl-radio__button" type="radio" name="typeYomikoStt" value="tamiyasu" />
+            <span class="mdl-radio__label">民安☆Talk</span>
+          </label>
+
+          <label class="mdl-radio mdl-js-radio" for="yomiko_stt_bouyomi">
+            <input id="yomiko_stt_bouyomi" class="mdl-radio__button" type="radio" name="typeYomikoStt" value="bouyomi" />
             <span class="mdl-radio__label">棒読みちゃん</span>
           </label>
         </div>

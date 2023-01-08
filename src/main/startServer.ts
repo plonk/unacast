@@ -237,7 +237,7 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
   }
 
   // 棒読みちゃん接続
-  if (config.typeYomiko === 'bouyomi') {
+  if (config.typeYomiko === 'bouyomi' || config.typeYomikoStt === 'bouyomi') {
     if (config.bouyomiPort) {
       bouyomi = new bouyomiChan({ port: config.bouyomiPort, volume: config.bouyomiVolume, prefix: config.bouyomiPrefix });
     }
@@ -725,12 +725,12 @@ const translateTaskScheduler = async (exeId: number) => {
 /** 読み子によって発話中であるか */
 let isSpeaking = false;
 /** 読み子を再生する */
-const playYomiko = async (msg: string) => {
+const playYomiko = async (typeYomiko: typeof config.typeYomiko, msg: string) => {
   // log.info('[playYomiko] start');
   isSpeaking = true;
 
   // 読み子呼び出し
-  switch (config.typeYomiko) {
+  switch (typeYomiko) {
     case 'tamiyasu': {
       log.debug(`${config.tamiyasuPath} "${msg}"`);
       spawn(config.tamiyasuPath, [msg]);
@@ -905,15 +905,27 @@ export const sendDom = async (messageList: UserComment[]) => {
     sendDomForChatWindow(newList);
 
     // レス着信音
-    if (config.playSe && globalThis.electron.seList.length > 0) {
-      await playSe();
+    if (globalThis.electron.seList.length > 0) {
+      if (newList.every((message) => message.from === 'stt')) {
+        // メッセージが全て音声認識の場合は専用の設定を見る
+        if (config.playSeStt) {
+          await playSe();
+        }
+      }
+      else {
+        if (config.playSe) {
+          await playSe();
+        }
+      }
     }
 
     // 読み子
-    if (globalThis.config.typeYomiko !== 'none') {
+    // メッセージが音声認識かどうかで使う読み子を分ける
+    const typeYomiko = newList[newList.length - 1].from === 'stt' ? globalThis.config.typeYomikoStt : globalThis.config.typeYomiko;
+    if (typeYomiko !== 'none') {
       // 対象のレスがAAで、AAモードが有効なら、読み上げ分はアスキーアートにする
       if (newList[newList.length - 1].isAA && config.aamode.enable) {
-        await playYomiko(config.aamode.speakWord);
+        await playYomiko(typeYomiko, config.aamode.speakWord);
       } else {
         // タグを除去する
         let text = newList[newList.length - 1].text.replace(/<br> /g, '\n ').replace(/<br>/g, '\n ');
@@ -924,7 +936,7 @@ export const sendDom = async (messageList: UserComment[]) => {
         if (globalThis.config.yomikoReplaceNewline) {
           text = text.replace(/\r\n/g, ' ').replace(/\n/g, ' ');
         }
-        await playYomiko(text);
+        await playYomiko(typeYomiko, text);
       }
     }
 

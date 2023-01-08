@@ -274,6 +274,7 @@ const buildConfigJson = () => {
 
   // SE再生設定
   const playSe = (document.getElementById('checkbox-playSe') as any).checked === true;
+  const playSeStt = (document.getElementById('checkbox-playSeStt') as any).checked === true;
   const playSeVolume = parseInt((document.getElementById('playSe-volume') as HTMLInputElement).value);
 
   let thumbnail: typeof globalThis['config']['thumbnail'] = 0;
@@ -297,6 +298,13 @@ const buildConfigJson = () => {
     const elem = v as HTMLInputElement;
     if (elem.checked) typeYomiko = elem.value as typeof globalThis['config']['typeYomiko'];
   });
+
+  let typeYomikoStt: typeof globalThis['config']['typeYomikoStt'] = 'none';
+  document.getElementsByName('typeYomikoStt').forEach((v) => {
+    const elem = v as HTMLInputElement;
+    if (elem.checked) typeYomikoStt = elem.value as typeof globalThis['config']['typeYomikoStt'];
+  });
+
 
   // コメント処理
   let commentProcessType: typeof globalThis['config']['commentProcessType'] = 0;
@@ -379,8 +387,10 @@ const buildConfigJson = () => {
     iconDirNiconico,
     sePath,
     playSe,
+    playSeStt,
     playSeVolume,
     typeYomiko,
+    typeYomikoStt,
     tamiyasuPath,
     bouyomiPort,
     bouyomiVolume,
@@ -444,7 +454,9 @@ const loadConfigToLocalStrage = async () => {
     sePath: '',
     playSeVolume: 100,
     playSe: false,
+    playSeStt: false,
     typeYomiko: 'none',
+    typeYomikoStt: 'none',
     tamiyasuPath: '',
     bouyomiPort: 50001,
     bouyomiVolume: 50,
@@ -524,6 +536,7 @@ const loadConfigToLocalStrage = async () => {
   // レス着信音
   (document.getElementById('text-se-path') as any).value = config.sePath;
   (document.getElementById('checkbox-playSe') as any).checked = config.playSe;
+  (document.getElementById('checkbox-playSeStt') as any).checked = config.playSeStt;
   (document.getElementById('disp-playSe-volume') as any).innerHTML = config.playSeVolume;
   (document.getElementById('playSe-volume') as any).value = config.playSeVolume;
 
@@ -555,6 +568,19 @@ const loadConfigToLocalStrage = async () => {
       (document.getElementById('yomiko_bouyomi') as any).checked = true;
       break;
   }
+
+  switch (config.typeYomikoStt) {
+    case 'none':
+      (document.getElementById('yomiko_stt_none') as any).checked = true;
+      break;
+    case 'tamiyasu':
+      (document.getElementById('yomiko_stt_tamiyasu') as any).checked = true;
+      break;
+    case 'bouyomi':
+      (document.getElementById('yomiko_stt_bouyomi') as any).checked = true;
+      break;
+  }
+
 
   switch (config.commentProcessType) {
     case 0:

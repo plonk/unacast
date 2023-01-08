@@ -127,8 +127,12 @@ declare global {
     let playSe: boolean;
     /** レス着信音音量 */
     let playSeVolume: number;
+    /** 音声認識レス着信音再生 */
+    let playSeStt: boolean;
     /** 読み子の種類 */
     let typeYomiko: 'none' | 'tamiyasu' | 'bouyomi';
+    /** 音声認識テキスト読み子の種類 */
+    let typeYomikoStt: 'none' | 'tamiyasu' | 'bouyomi';
     /** 民安Talkのファイルパス */
     let tamiyasuPath: string;
     /** 棒読みちゃんの待ち受けポート */
