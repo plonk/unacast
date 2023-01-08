@@ -325,7 +325,7 @@ var electron_log_1 = __importDefault(__webpack_require__(/*! electron-log */ "el
 var logger = electron_log_1.default.scope('azureStt');
 var AzureSpeechToText = /** @class */ (function (_super) {
     __extends(AzureSpeechToText, _super);
-    function AzureSpeechToText(name, key, region, language) {
+    function AzureSpeechToText(name, key, region, language, inputDevice) {
         var _this = _super.call(this) || this;
         if (!key)
             throw TypeError('key required.');
@@ -335,6 +335,7 @@ var AzureSpeechToText = /** @class */ (function (_super) {
         _this.key = key;
         _this.region = region;
         _this.language = language;
+        _this.inputDevice = inputDevice;
         electron_1.ipcMain.on(const_1.electronEvent.AZURE_STT_EVENT, function (event, event_name, arg) {
             if (arg) {
                 var item = {
@@ -356,7 +357,7 @@ var AzureSpeechToText = /** @class */ (function (_super) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 logger.info('starting');
-                globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.AZURE_STT_START, { key: this.key, region: this.region, language: this.language });
+                globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.AZURE_STT_START, { key: this.key, region: this.region, language: this.language, inputDevice: this.inputDevice });
                 return [2 /*return*/];
             });
         });
@@ -2684,7 +2685,7 @@ electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, confi
         }
         // Azure SpeechToText
         if (globalThis.config.azureStt && globalThis.config.azureStt.enable && globalThis.config.azureStt.key && globalThis.config.azureStt.region) {
-            stt = new azureStt_1.default(globalThis.config.azureStt.name || "", globalThis.config.azureStt.key, globalThis.config.azureStt.region, globalThis.config.azureStt.language || "ja-JP");
+            stt = new azureStt_1.default(globalThis.config.azureStt.name || "", globalThis.config.azureStt.key, globalThis.config.azureStt.region, globalThis.config.azureStt.language || "ja-JP", globalThis.config.azureStt.inputDevice);
             globalThis.electron.azureStt = stt;
             stt.on('start', function () {
                 globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {

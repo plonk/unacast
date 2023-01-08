@@ -62,6 +62,8 @@ declare global {
       name: string;
       /** 認識言語 **/
       language: 'ja-JP' | 'en-US';
+      /** 入力デバイスID **/
+      inputDevice: string;
     };
 
     /** 開始レス番号 */

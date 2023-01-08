@@ -250,7 +250,8 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
       globalThis.config.azureStt.name || "",
       globalThis.config.azureStt.key,
       globalThis.config.azureStt.region,
-      globalThis.config.azureStt.language || "ja-JP"
+      globalThis.config.azureStt.language || "ja-JP",
+      globalThis.config.azureStt.inputDevice
     );
     globalThis.electron.azureStt = stt;
     stt.on('start', () => {

@@ -12,7 +12,8 @@ class AzureSpeechToText extends EventEmitter {
   key: string;
   region: string;
   language: string;
-  constructor(name: string, key: string, region: string, language: string) {
+  inputDevice?: string;
+  constructor(name: string, key: string, region: string, language: string, inputDevice?: string) {
     super();
     if (!key) throw TypeError('key required.');
     if (!region) throw TypeError('Region required.');
@@ -20,6 +21,7 @@ class AzureSpeechToText extends EventEmitter {
     this.key = key;
     this.region = region;
     this.language = language;
+    this.inputDevice = inputDevice;
     ipcMain.on(electronEvent.AZURE_STT_EVENT, (event: any, event_name: string, arg?: { date: string, text: string }) => {
       if (arg) {
         const item: UserComment = {
@@ -39,7 +41,7 @@ class AzureSpeechToText extends EventEmitter {
 
   public async start() {
     logger.info('starting');
-    globalThis.electron.mainWindow.webContents.send(electronEvent.AZURE_STT_START, { key: this.key, region: this.region, language: this.language });
+    globalThis.electron.mainWindow.webContents.send(electronEvent.AZURE_STT_START, { key: this.key, region: this.region, language: this.language, inputDevice: this.inputDevice });
   }
 
   public async stop() {

@@ -209,6 +209,7 @@ const toggleInputFormDisable = (isDisabled: boolean) => {
   (document.getElementById('azureStt-key') as HTMLInputElement).disabled = isDisabled;
   (document.getElementById('azureStt-region') as HTMLInputElement).disabled = isDisabled;
   (document.getElementById('azureStt-language') as HTMLInputElement).disabled = isDisabled;
+  (document.getElementById('azureStt-inputDevice') as HTMLInputElement).disabled = isDisabled;
 };
 
 /**
@@ -242,6 +243,7 @@ const buildConfigJson = () => {
     key: (document.getElementById('azureStt-key') as HTMLInputElement).value,
     region: (document.getElementById('azureStt-region') as HTMLInputElement).value,
     language: ((document.getElementById('azureStt-language') as HTMLSelectElement).value as typeof globalThis['config']['azureStt']['language']) ?? 'ja-JP',
+    inputDevice: (document.getElementById('azureStt-inputDevice') as HTMLSelectElement).value,
   };
 
   const notifyThreadConnectionErrorLimit = parseInt((document.getElementById('text-notify-threadConnectionErrorLimit') as HTMLInputElement).value);
@@ -488,6 +490,7 @@ const loadConfigToLocalStrage = async () => {
       key: "",
       region: "",
       language: "ja-JP",
+      inputDevice: "default",
     },
     audioOutputDevices: ['default'],
   };
@@ -642,6 +645,12 @@ const loadConfigToLocalStrage = async () => {
     `;
     (document.getElementById('audioOutputDevices') as HTMLDivElement).insertAdjacentHTML('afterbegin', domstr);
   });
+  const audioinput = devices.filter((device) => device.kind === 'audioinput');
+  audioinput.map((val) => {
+    const domstr = `<option value="${val.deviceId}">${val.label}</option>`;
+    (document.getElementById('azureStt-inputDevice') as HTMLDivElement).insertAdjacentHTML('afterbegin', domstr);
+  });
+  (document.getElementById('azureStt-inputDevice') as any).value = config.azureStt.inputDevice;
 
   log.debug('config loaded');
 };

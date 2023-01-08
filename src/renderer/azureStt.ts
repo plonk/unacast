@@ -10,11 +10,11 @@ const ipcRenderer = electron.ipcRenderer;
 
 let speechRecognizer: SpeechRecognizer | undefined;
 
-const start = (key: string, region: string, language: string) => {
+const start = (key: string, region: string, language: string, inputDevice?: string) => {
   logger.info("starting text recognition from microphone.");
   const speechConfig = SpeechConfig.fromSubscription(key, region);
   speechConfig.speechRecognitionLanguage = language;
-  const audioConfig = AudioConfig.fromDefaultMicrophoneInput();
+  const audioConfig = AudioConfig.fromMicrophoneInput(inputDevice === '' ? undefined : inputDevice);
   const startTime = Date.now();
   const recognizer = new SpeechRecognizer(speechConfig, audioConfig);
   recognizer.recognized = (s, e) => {
@@ -54,9 +54,9 @@ const stop = () => {
   }
 }
 
-ipcRenderer.on(electronEvent.AZURE_STT_START, (event: any, arg: { key: string, region: string, language: string }) => {
+ipcRenderer.on(electronEvent.AZURE_STT_START, (event: any, arg: { key: string, region: string, language: string, inputDevice?: string }) => {
   logger.debug('DOM Content Loaded');
-  start(arg.key, arg.region, arg.language);
+  start(arg.key, arg.region, arg.language, arg.inputDevice);
 });
 
 ipcRenderer.on(electronEvent.AZURE_STT_STOP, (event: any) => {
