@@ -11,8 +11,9 @@ class CommentIcons {
   youtubeIconList: string[] = [];
   twitchIconList: string[] = [path.resolve(__dirname, `../public/img/twitch.png`)];
   niconicoIconList: string[] = [path.resolve(__dirname, `../public/img/niconico.png`)];
+  sttIconList: string[] = [];
 
-  constructor(arg: { bbs: string; youtube: string; twitch: string; niconico: string }) {
+  constructor(arg: { bbs: string; youtube: string; twitch: string; niconico: string, stt: string }) {
     const randomDir = fs.existsSync(arg.bbs) ? arg.bbs : path.resolve(__dirname, `../public/img/random/`);
     log.debug('loadRandomDir = ' + randomDir);
     this.bbsIconList = readDir(randomDir);
@@ -28,11 +29,16 @@ class CommentIcons {
       const list = readDir(arg.niconico);
       if (list.length > 0) this.niconicoIconList = list;
     }
+    if (fs.existsSync(arg.stt)) {
+      const list = readDir(arg.stt);
+      if (list.length > 0) this.sttIconList = list;
+    }
 
     log.debug(this.bbsIconList);
     log.debug(this.youtubeIconList);
     log.debug(this.twitchIconList);
     log.debug(this.niconicoIconList);
+    log.debug(this.sttIconList);
   }
 
   // /**
@@ -101,6 +107,19 @@ class CommentIcons {
     try {
       const num = Math.floor(this.niconicoIconList.length * Math.random());
       const iconPath = this.niconicoIconList[num];
+      icon = fs.readFileSync(iconPath, { encoding: 'base64' });
+    } catch (e) {
+      log.error(e);
+    }
+    return icon;
+  };
+  getStt = () => {
+    let icon = '';
+    // 専用アイコンがなければ BBS のアイコンを使う
+    const list = this.sttIconList.length !== 0 ? this.sttIconList : this.bbsIconList;
+    try {
+      const num = Math.floor(list.length * Math.random());
+      const iconPath = list[num];
       icon = fs.readFileSync(iconPath, { encoding: 'base64' });
     } catch (e) {
       log.error(e);

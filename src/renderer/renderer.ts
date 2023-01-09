@@ -203,6 +203,13 @@ const toggleInputFormDisable = (isDisabled: boolean) => {
 
   (document.getElementById('checkbox-wordBreak') as any).disabled = isDisabled;
   (document.getElementById('checkbox-wordBreak') as any).parentNode.style.backgroundColor = isDisabled ? 'lightgray' : '';
+
+  (document.getElementById('azureStt-enable') as HTMLInputElement).disabled = isDisabled;
+  (document.getElementById('azureStt-name') as HTMLInputElement).disabled = isDisabled;
+  (document.getElementById('azureStt-key') as HTMLInputElement).disabled = isDisabled;
+  (document.getElementById('azureStt-region') as HTMLInputElement).disabled = isDisabled;
+  (document.getElementById('azureStt-language') as HTMLInputElement).disabled = isDisabled;
+  (document.getElementById('azureStt-inputDevice') as HTMLInputElement).disabled = isDisabled;
 };
 
 /**
@@ -228,6 +235,16 @@ const buildConfigJson = () => {
   const bouyomiVolume = parseInt((document.getElementById('bouyomi-volume') as HTMLInputElement).value);
   const bouyomiPrefix = (document.getElementById('text-bouyomi-prefix') as HTMLInputElement).value;
   const yomikoReplaceNewline = (document.getElementById('yomiko-replace-newline') as any).checked === true;
+
+  // Azure Text To Speect
+  const azureStt: typeof globalThis['config']['azureStt'] = {
+    enable: (document.getElementById('azureStt-enable') as any).checked === true,
+    name: (document.getElementById('azureStt-name') as HTMLInputElement).value,
+    key: (document.getElementById('azureStt-key') as HTMLInputElement).value,
+    region: (document.getElementById('azureStt-region') as HTMLInputElement).value,
+    language: ((document.getElementById('azureStt-language') as HTMLSelectElement).value as typeof globalThis['config']['azureStt']['language']) ?? 'ja-JP',
+    inputDevice: (document.getElementById('azureStt-inputDevice') as HTMLSelectElement).value,
+  };
 
   const notifyThreadConnectionErrorLimit = parseInt((document.getElementById('text-notify-threadConnectionErrorLimit') as HTMLInputElement).value);
   const notifyThreadResLimit = parseInt((document.getElementById('text-notify-threadResLimit') as HTMLInputElement).value);
@@ -256,9 +273,11 @@ const buildConfigJson = () => {
   const iconDirYoutube = (document.getElementById('icon_dir_youtube') as HTMLInputElement).value.trim();
   const iconDirTwitch = (document.getElementById('icon_dir_twitch') as HTMLInputElement).value.trim();
   const iconDirNiconico = (document.getElementById('icon_dir_niconico') as HTMLInputElement).value.trim();
+  const iconDirStt = (document.getElementById('icon_dir_stt') as HTMLInputElement).value.trim();
 
   // SE再生設定
   const playSe = (document.getElementById('checkbox-playSe') as any).checked === true;
+  const playSeStt = (document.getElementById('checkbox-playSeStt') as any).checked === true;
   const playSeVolume = parseInt((document.getElementById('playSe-volume') as HTMLInputElement).value);
 
   let thumbnail: typeof globalThis['config']['thumbnail'] = 0;
@@ -282,6 +301,13 @@ const buildConfigJson = () => {
     const elem = v as HTMLInputElement;
     if (elem.checked) typeYomiko = elem.value as typeof globalThis['config']['typeYomiko'];
   });
+
+  let typeYomikoStt: typeof globalThis['config']['typeYomikoStt'] = 'none';
+  document.getElementsByName('typeYomikoStt').forEach((v) => {
+    const elem = v as HTMLInputElement;
+    if (elem.checked) typeYomikoStt = elem.value as typeof globalThis['config']['typeYomikoStt'];
+  });
+
 
   // コメント処理
   let commentProcessType: typeof globalThis['config']['commentProcessType'] = 0;
@@ -362,10 +388,13 @@ const buildConfigJson = () => {
     iconDirYoutube,
     iconDirTwitch,
     iconDirNiconico,
+    iconDirStt,
     sePath,
     playSe,
+    playSeStt,
     playSeVolume,
     typeYomiko,
+    typeYomikoStt,
     tamiyasuPath,
     bouyomiPort,
     bouyomiVolume,
@@ -377,6 +406,7 @@ const buildConfigJson = () => {
     commentProcessType,
     dispType,
     aamode,
+    azureStt,
     translate,
     audioOutputDevices,
   };
@@ -425,10 +455,13 @@ const loadConfigToLocalStrage = async () => {
     iconDirYoutube: '',
     iconDirTwitch: '',
     iconDirNiconico: '',
+    iconDirStt: '',
     sePath: '',
     playSeVolume: 100,
     playSe: false,
+    playSeStt: false,
     typeYomiko: 'none',
+    typeYomikoStt: 'none',
     tamiyasuPath: '',
     bouyomiPort: 50001,
     bouyomiVolume: 50,
@@ -450,6 +483,14 @@ const loadConfigToLocalStrage = async () => {
     translate: {
       enable: true,
       targetLang: 'ja',
+    },
+    azureStt: {
+      enable: true,
+      name: "",
+      key: "",
+      region: "",
+      language: "ja-JP",
+      inputDevice: "default",
     },
     audioOutputDevices: ['default'],
   };
@@ -501,6 +542,7 @@ const loadConfigToLocalStrage = async () => {
   // レス着信音
   (document.getElementById('text-se-path') as any).value = config.sePath;
   (document.getElementById('checkbox-playSe') as any).checked = config.playSe;
+  (document.getElementById('checkbox-playSeStt') as any).checked = config.playSeStt;
   (document.getElementById('disp-playSe-volume') as any).innerHTML = config.playSeVolume;
   (document.getElementById('playSe-volume') as any).value = config.playSeVolume;
 
@@ -519,6 +561,7 @@ const loadConfigToLocalStrage = async () => {
   (document.getElementById('icon_dir_youtube') as any).value = config.iconDirYoutube;
   (document.getElementById('icon_dir_twitch') as any).value = config.iconDirTwitch;
   (document.getElementById('icon_dir_niconico') as any).value = config.iconDirNiconico;
+  (document.getElementById('icon_dir_stt') as any).value = config.iconDirStt;
 
   // 読み子の種類
   switch (config.typeYomiko) {
@@ -532,6 +575,19 @@ const loadConfigToLocalStrage = async () => {
       (document.getElementById('yomiko_bouyomi') as any).checked = true;
       break;
   }
+
+  switch (config.typeYomikoStt) {
+    case 'none':
+      (document.getElementById('yomiko_stt_none') as any).checked = true;
+      break;
+    case 'tamiyasu':
+      (document.getElementById('yomiko_stt_tamiyasu') as any).checked = true;
+      break;
+    case 'bouyomi':
+      (document.getElementById('yomiko_stt_bouyomi') as any).checked = true;
+      break;
+  }
+
 
   switch (config.commentProcessType) {
     case 0:
@@ -566,6 +622,13 @@ const loadConfigToLocalStrage = async () => {
   (document.getElementById('translate_enable') as any).checked = config.translate.enable;
   (document.getElementById('translate_targetLang') as HTMLSelectElement).value = config.translate.targetLang;
 
+  // Azure Text To Speech
+  (document.getElementById('azureStt-enable') as any).checked = config.azureStt.enable;
+  (document.getElementById('azureStt-name') as any).value = config.azureStt.name;
+  (document.getElementById('azureStt-key') as any).value = config.azureStt.key;
+  (document.getElementById('azureStt-region') as any).value = config.azureStt.region;
+  (document.getElementById('azureStt-language') as any).value = config.azureStt.language;
+
   // --------------------この下の処理でラジオボタンの処理が動かなくなるので、何か足す時はここより上に追記すること------------------------------
 
   // 使用可能なデバイスの一覧を取得
@@ -582,6 +645,12 @@ const loadConfigToLocalStrage = async () => {
     `;
     (document.getElementById('audioOutputDevices') as HTMLDivElement).insertAdjacentHTML('afterbegin', domstr);
   });
+  const audioinput = devices.filter((device) => device.kind === 'audioinput');
+  audioinput.map((val) => {
+    const domstr = `<option value="${val.deviceId}">${val.label}</option>`;
+    (document.getElementById('azureStt-inputDevice') as HTMLDivElement).insertAdjacentHTML('afterbegin', domstr);
+  });
+  (document.getElementById('azureStt-inputDevice') as any).value = config.azureStt.inputDevice;
 
   log.debug('config loaded');
 };
@@ -651,7 +720,7 @@ ipcRenderer.on(electronEvent.SHOW_ALERT, async (event: any, args: string) => {
 });
 
 // 何かしら通知したいことがあったら表示する
-ipcRenderer.on(electronEvent.UPDATE_STATUS, async (event: any, args: { commentType: 'bbs' | 'jpnkn' | 'youtube' | 'twitch' | 'niconico'; category: string; message: string }) => {
+ipcRenderer.on(electronEvent.UPDATE_STATUS, async (event: any, args: { commentType: 'bbs' | 'jpnkn' | 'youtube' | 'twitch' | 'niconico' | 'stt'; category: string; message: string }) => {
   log.debug(`[UPDATE_STATUS] commentType = ${args.commentType} category = ${args.category}`);
   switch (args.commentType) {
     case 'bbs': {
@@ -686,6 +755,12 @@ ipcRenderer.on(electronEvent.UPDATE_STATUS, async (event: any, args: { commentTy
       }
       break;
     }
+    case 'stt': {
+      if (args.category === 'status') {
+        (document.getElementById('stt-status') as HTMLElement).innerText = args.message;
+      }
+      break;
+    }
   }
 });
 
@@ -697,3 +772,5 @@ ipcRenderer.on(electronEvent.SAVE_CONFIG, async (event: any, arg: typeof globalT
 ipcRenderer.on(electronEvent.PREVIEW_IMAGE, (event: any, url: string) => {
   window.electron.imagePreviewWindow.webContents.send(electronEvent.PREVIEW_IMAGE, url);
 });
+
+require('./azureStt');

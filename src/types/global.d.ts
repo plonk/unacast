@@ -4,6 +4,7 @@ import { LiveChat } from '../main/youtube-chat';
 import NiconamaComment from '../main/niconama';
 import JpnknFast from '../main/jpnkn';
 import CommentIcons from '../main/CommentIcons';
+import AzureSpeechToText from '../main/azureStt';
 
 declare global {
   namespace electron {
@@ -24,6 +25,8 @@ declare global {
     let jpnknFast: JpnknFast;
     /** ニコ生チャットインスタンス */
     let niconicoChat: NiconamaComment;
+    /** Azure Speech To Text */
+    let azureStt: AzureSpeechToText;
     /** 掲示板の読み込み済みのレス番号 */
     let threadNumber: number;
     /** 掲示板との連続通信エラー回数 */
@@ -46,6 +49,22 @@ declare global {
     let twitchId: string;
     /** ニコニココミュニティID */
     let niconicoId: string;
+
+    /** Azure Speech To Text 設定 **/
+    let azureStt: {
+      /** 有効にするかどうか **/
+      enable: boolean;
+      /** サブスクリプションキー **/
+      key: string;
+      /** サブスクリプションリージョン **/
+      region: string;
+      /** 発言者表示名 **/
+      name: string;
+      /** 認識言語 **/
+      language: 'ja-JP' | 'en-US';
+      /** 入力デバイスID **/
+      inputDevice: string;
+    };
 
     /** 開始レス番号 */
     let resNumber: string;
@@ -104,14 +123,20 @@ declare global {
     let iconDirTwitch: string;
     /** iconのパス niconico */
     let iconDirNiconico: string;
+    /** iconのパス 音声認識 */
+    let iconDirStt: string;
     /** レス着信音のパス */
     let sePath: string;
     /** レス着信音再生 */
     let playSe: boolean;
     /** レス着信音音量 */
     let playSeVolume: number;
+    /** 音声認識レス着信音再生 */
+    let playSeStt: boolean;
     /** 読み子の種類 */
     let typeYomiko: 'none' | 'tamiyasu' | 'bouyomi';
+    /** 音声認識テキスト読み子の種類 */
+    let typeYomikoStt: 'none' | 'tamiyasu' | 'bouyomi';
     /** 民安Talkのファイルパス */
     let tamiyasuPath: string;
     /** 棒読みちゃんの待ち受けポート */
@@ -158,4 +183,4 @@ declare global {
   }
 }
 
-export {};
+export { };

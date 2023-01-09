@@ -38,6 +38,7 @@ const renderer = {
     chat: './src/renderer/chat',
     translate: './src/renderer/translate',
     imagePreview: './src/renderer/imagePreview',
+    azureStt: './src/renderer/azureStt',
   },
   output: {
     filename: '[name].js',

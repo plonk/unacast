@@ -17,6 +17,7 @@ import { spawn } from 'child_process';
 import { electronEvent } from './const';
 import NiconamaComment from './niconama';
 import JpnknFast from './jpnkn';
+import AzureSpeechToText from './azureStt';
 import tr from 'googletrans';
 import CommentIcons from './CommentIcons';
 
@@ -127,6 +128,7 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
     youtube: globalThis.config.iconDirYoutube,
     twitch: globalThis.config.iconDirTwitch,
     niconico: globalThis.config.iconDirNiconico,
+    stt: globalThis.config.iconDirStt,
   });
 
   // SEを取得する
@@ -236,10 +238,54 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
   }
 
   // 棒読みちゃん接続
-  if (config.typeYomiko === 'bouyomi') {
+  if (config.typeYomiko === 'bouyomi' || config.typeYomikoStt === 'bouyomi') {
     if (config.bouyomiPort) {
       bouyomi = new bouyomiChan({ port: config.bouyomiPort, volume: config.bouyomiVolume, prefix: config.bouyomiPrefix });
     }
+  }
+
+  // Azure SpeechToText
+  if (globalThis.config.azureStt && globalThis.config.azureStt.enable && globalThis.config.azureStt.key && globalThis.config.azureStt.region) {
+    const stt = new AzureSpeechToText(
+      globalThis.config.azureStt.name || "",
+      globalThis.config.azureStt.key,
+      globalThis.config.azureStt.region,
+      globalThis.config.azureStt.language || "ja-JP",
+      globalThis.config.azureStt.inputDevice
+    );
+    globalThis.electron.azureStt = stt;
+    stt.on('start', () => {
+      globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
+        commentType: 'stt',
+        category: 'status',
+        message: `started`
+      });
+    });
+
+    stt.on('comment', (event) => {
+      globalThis.electron.commentQueueList.push({ ...event, imgUrl: globalThis.electron.iconList.getStt() });
+      globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
+        commentType: 'stt',
+        category: 'status',
+        message: `ok`,
+      });
+    });
+    // 読み取り終了
+    stt.on('end', () => {
+      globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
+        commentType: 'stt',
+        category: 'status',
+        message: `stopped`,
+      });
+    });
+    stt.on('error', () => {
+      globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, {
+        commentType: 'stt',
+        category: 'status',
+        message: `error`,
+      });
+    });
+    stt.start();
   }
 
   // レス取得定期実行
@@ -505,6 +551,13 @@ ipcMain.on(electronEvent.STOP_SERVER, (event) => {
     globalThis.electron.jpnknFast.removeAllListeners();
     globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, { commentType: 'jpnkn', category: 'status', message: `connection end` });
   }
+
+  // Azure Speech To Textインターフェース
+  if (globalThis.electron.azureStt) {
+    globalThis.electron.azureStt.stop();
+    globalThis.electron.azureStt.removeAllListeners();
+    globalThis.electron.mainWindow.webContents.send(electronEvent.UPDATE_STATUS, { commentType: 'stt', category: 'status', message: `connection end` });
+  }
 });
 
 const getResInterval = async (exeId: number) => {
@@ -678,12 +731,12 @@ const translateTaskScheduler = async (exeId: number) => {
 /** 読み子によって発話中であるか */
 let isSpeaking = false;
 /** 読み子を再生する */
-const playYomiko = async (msg: string) => {
+const playYomiko = async (typeYomiko: typeof config.typeYomiko, msg: string) => {
   // log.info('[playYomiko] start');
   isSpeaking = true;
 
   // 読み子呼び出し
-  switch (config.typeYomiko) {
+  switch (typeYomiko) {
     case 'tamiyasu': {
       log.debug(`${config.tamiyasuPath} "${msg}"`);
       spawn(config.tamiyasuPath, [msg]);
@@ -858,15 +911,27 @@ export const sendDom = async (messageList: UserComment[]) => {
     sendDomForChatWindow(newList);
 
     // レス着信音
-    if (config.playSe && globalThis.electron.seList.length > 0) {
-      await playSe();
+    if (globalThis.electron.seList.length > 0) {
+      if (newList.every((message) => message.from === 'stt')) {
+        // メッセージが全て音声認識の場合は専用の設定を見る
+        if (config.playSeStt) {
+          await playSe();
+        }
+      }
+      else {
+        if (config.playSe) {
+          await playSe();
+        }
+      }
     }
 
     // 読み子
-    if (globalThis.config.typeYomiko !== 'none') {
+    // メッセージが音声認識かどうかで使う読み子を分ける
+    const typeYomiko = newList[newList.length - 1].from === 'stt' ? globalThis.config.typeYomikoStt : globalThis.config.typeYomiko;
+    if (typeYomiko !== 'none') {
       // 対象のレスがAAで、AAモードが有効なら、読み上げ分はアスキーアートにする
       if (newList[newList.length - 1].isAA && config.aamode.enable) {
-        await playYomiko(config.aamode.speakWord);
+        await playYomiko(typeYomiko, config.aamode.speakWord);
       } else {
         // タグを除去する
         let text = newList[newList.length - 1].text.replace(/<br> /g, '\n ').replace(/<br>/g, '\n ');
@@ -877,7 +942,7 @@ export const sendDom = async (messageList: UserComment[]) => {
         if (globalThis.config.yomikoReplaceNewline) {
           text = text.replace(/\r\n/g, ' ').replace(/\n/g, ' ');
         }
-        await playYomiko(text);
+        await playYomiko(typeYomiko, text);
       }
     }
 

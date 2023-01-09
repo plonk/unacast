@@ -113,6 +113,7 @@ var CommentIcons = /** @class */ (function () {
         this.youtubeIconList = [];
         this.twitchIconList = [path_1.default.resolve(__dirname, "../public/img/twitch.png")];
         this.niconicoIconList = [path_1.default.resolve(__dirname, "../public/img/niconico.png")];
+        this.sttIconList = [];
         // /**
         //  * アイコンランダム表示機能（デフォルト）
         //  * 起動時に作成したアイコンリストからランダムで1つ取得
@@ -189,6 +190,20 @@ var CommentIcons = /** @class */ (function () {
             }
             return icon;
         };
+        this.getStt = function () {
+            var icon = '';
+            // 専用アイコンがなければ BBS のアイコンを使う
+            var list = _this.sttIconList.length !== 0 ? _this.sttIconList : _this.bbsIconList;
+            try {
+                var num = Math.floor(list.length * Math.random());
+                var iconPath = list[num];
+                icon = fs_1.default.readFileSync(iconPath, { encoding: 'base64' });
+            }
+            catch (e) {
+                log.error(e);
+            }
+            return icon;
+        };
         var randomDir = fs_1.default.existsSync(arg.bbs) ? arg.bbs : path_1.default.resolve(__dirname, "../public/img/random/");
         log.debug('loadRandomDir = ' + randomDir);
         this.bbsIconList = readDir(randomDir);
@@ -205,10 +220,16 @@ var CommentIcons = /** @class */ (function () {
             if (list.length > 0)
                 this.niconicoIconList = list;
         }
+        if (fs_1.default.existsSync(arg.stt)) {
+            var list = readDir(arg.stt);
+            if (list.length > 0)
+                this.sttIconList = list;
+        }
         log.debug(this.bbsIconList);
         log.debug(this.youtubeIconList);
         log.debug(this.twitchIconList);
         log.debug(this.niconicoIconList);
+        log.debug(this.sttIconList);
     }
     return CommentIcons;
 }());
@@ -228,6 +249,134 @@ var readDir = function (imgDir) {
     return iconFileList;
 };
 exports.default = CommentIcons;
+
+
+/***/ }),
+
+/***/ "./src/main/azureStt/index.ts":
+/*!************************************!*\
+  !*** ./src/main/azureStt/index.ts ***!
+  \************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * azure speech to text
+ */
+var electron_1 = __webpack_require__(/*! electron */ "electron");
+var const_1 = __webpack_require__(/*! ../const */ "./src/main/const.ts");
+var events_1 = __webpack_require__(/*! events */ "events");
+var electron_log_1 = __importDefault(__webpack_require__(/*! electron-log */ "electron-log"));
+var logger = electron_log_1.default.scope('azureStt');
+var AzureSpeechToText = /** @class */ (function (_super) {
+    __extends(AzureSpeechToText, _super);
+    function AzureSpeechToText(name, key, region, language, inputDevice) {
+        var _this = _super.call(this) || this;
+        if (!key)
+            throw TypeError('key required.');
+        if (!region)
+            throw TypeError('Region required.');
+        _this.name = name;
+        _this.key = key;
+        _this.region = region;
+        _this.language = language;
+        _this.inputDevice = inputDevice;
+        electron_1.ipcMain.on(const_1.electronEvent.AZURE_STT_EVENT, function (event, event_name, arg) {
+            if (arg) {
+                var item = {
+                    name: _this.name,
+                    date: arg.date,
+                    text: arg.text,
+                    imgUrl: globalThis.electron.iconList.getBbs(),
+                    from: 'stt',
+                };
+                _this.emit(event_name, item);
+            }
+            else {
+                _this.emit(event_name);
+            }
+        });
+        return _this;
+    }
+    AzureSpeechToText.prototype.start = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                logger.info('starting');
+                globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.AZURE_STT_START, { key: this.key, region: this.region, language: this.language, inputDevice: this.inputDevice });
+                return [2 /*return*/];
+            });
+        });
+    };
+    AzureSpeechToText.prototype.stop = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                logger.info('stopping');
+                globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.AZURE_STT_STOP);
+                return [2 /*return*/];
+            });
+        });
+    };
+    AzureSpeechToText.prototype.on = function (event, listener) {
+        return _super.prototype.on.call(this, event, listener);
+    };
+    return AzureSpeechToText;
+}(events_1.EventEmitter));
+exports.default = AzureSpeechToText;
 
 
 /***/ }),
@@ -371,6 +520,10 @@ exports.electronEvent = {
     COMMENT_TEST: 'COMMENT_TEST',
     /** 画像プレビュー */
     PREVIEW_IMAGE: 'PREVIEW_IMAGE',
+    /** Azure Speech To text **/
+    AZURE_STT_START: 'azure-stt-start',
+    AZURE_STT_STOP: 'azure-stt-stop',
+    AZURE_STT_EVENT: 'azure-stt-event',
 };
 
 
@@ -967,6 +1120,7 @@ else {
         youtubeChat: null,
         niconicoChat: null,
         jpnknFast: null,
+        azureStt: null,
         threadConnectionError: 0,
         threadNumber: 0,
         commentQueueList: [],
@@ -2327,6 +2481,7 @@ var child_process_1 = __webpack_require__(/*! child_process */ "child_process");
 var const_1 = __webpack_require__(/*! ./const */ "./src/main/const.ts");
 var niconama_1 = __importDefault(__webpack_require__(/*! ./niconama */ "./src/main/niconama/index.ts"));
 var jpnkn_1 = __importDefault(__webpack_require__(/*! ./jpnkn */ "./src/main/jpnkn/index.ts"));
+var azureStt_1 = __importDefault(__webpack_require__(/*! ./azureStt */ "./src/main/azureStt/index.ts"));
 var googletrans_1 = __importDefault(__webpack_require__(/*! googletrans */ "googletrans"));
 var CommentIcons_1 = __importDefault(__webpack_require__(/*! ./CommentIcons */ "./src/main/CommentIcons.ts"));
 var app;
@@ -2386,7 +2541,7 @@ electron_1.ipcMain.on(const_1.electronEvent.APPLY_CONFIG, function (event, confi
  * サーバー起動
  */
 electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, config) { return __awaiter(void 0, void 0, void 0, function () {
-    var expressApp, expressInstance, nico, jpn;
+    var expressApp, expressInstance, nico, jpn, stt;
     return __generator(this, function (_a) {
         globalThis.electron.chatWindow.webContents.send(const_1.electronEvent.CLEAR_COMMENT);
         globalThis.electron.translateWindow.webContents.send(const_1.electronEvent.CLEAR_COMMENT);
@@ -2424,6 +2579,7 @@ electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, confi
             youtube: globalThis.config.iconDirYoutube,
             twitch: globalThis.config.iconDirTwitch,
             niconico: globalThis.config.iconDirNiconico,
+            stt: globalThis.config.iconDirStt,
         });
         // SEを取得する
         if (globalThis.config.sePath) {
@@ -2522,10 +2678,46 @@ electron_1.ipcMain.on(const_1.electronEvent.START_SERVER, function (event, confi
             jpn.start();
         }
         // 棒読みちゃん接続
-        if (config.typeYomiko === 'bouyomi') {
+        if (config.typeYomiko === 'bouyomi' || config.typeYomikoStt === 'bouyomi') {
             if (config.bouyomiPort) {
                 bouyomi = new bouyomi_chan_1.default({ port: config.bouyomiPort, volume: config.bouyomiVolume, prefix: config.bouyomiPrefix });
             }
+        }
+        // Azure SpeechToText
+        if (globalThis.config.azureStt && globalThis.config.azureStt.enable && globalThis.config.azureStt.key && globalThis.config.azureStt.region) {
+            stt = new azureStt_1.default(globalThis.config.azureStt.name || "", globalThis.config.azureStt.key, globalThis.config.azureStt.region, globalThis.config.azureStt.language || "ja-JP", globalThis.config.azureStt.inputDevice);
+            globalThis.electron.azureStt = stt;
+            stt.on('start', function () {
+                globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {
+                    commentType: 'stt',
+                    category: 'status',
+                    message: "started"
+                });
+            });
+            stt.on('comment', function (event) {
+                globalThis.electron.commentQueueList.push(__assign(__assign({}, event), { imgUrl: globalThis.electron.iconList.getStt() }));
+                globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {
+                    commentType: 'stt',
+                    category: 'status',
+                    message: "ok",
+                });
+            });
+            // 読み取り終了
+            stt.on('end', function () {
+                globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {
+                    commentType: 'stt',
+                    category: 'status',
+                    message: "stopped",
+                });
+            });
+            stt.on('error', function () {
+                globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, {
+                    commentType: 'stt',
+                    category: 'status',
+                    message: "error",
+                });
+            });
+            stt.start();
         }
         // レス取得定期実行
         threadIntervalEvent = true;
@@ -2811,6 +3003,12 @@ electron_1.ipcMain.on(const_1.electronEvent.STOP_SERVER, function (event) {
         globalThis.electron.jpnknFast.removeAllListeners();
         globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, { commentType: 'jpnkn', category: 'status', message: "connection end" });
     }
+    // Azure Speech To Textインターフェース
+    if (globalThis.electron.azureStt) {
+        globalThis.electron.azureStt.stop();
+        globalThis.electron.azureStt.removeAllListeners();
+        globalThis.electron.mainWindow.webContents.send(const_1.electronEvent.UPDATE_STATUS, { commentType: 'stt', category: 'status', message: "connection end" });
+    }
 });
 var getResInterval = function (exeId) { return __awaiter(void 0, void 0, void 0, function () {
     var resNum, isfirst, result, threadTitle, temp, _loop_1, _i, result_1, item;
@@ -3031,14 +3229,14 @@ var translateTaskScheduler = function (exeId) { return __awaiter(void 0, void 0,
 /** 読み子によって発話中であるか */
 var isSpeaking = false;
 /** 読み子を再生する */
-var playYomiko = function (msg) { return __awaiter(void 0, void 0, void 0, function () {
+var playYomiko = function (typeYomiko, msg) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 // log.info('[playYomiko] start');
                 isSpeaking = true;
                 // 読み子呼び出し
-                switch (config.typeYomiko) {
+                switch (typeYomiko) {
                     case 'tamiyasu': {
                         electron_log_1.default.debug(config.tamiyasuPath + " \"" + msg + "\"");
                         child_process_1.spawn(config.tamiyasuPath, [msg]);
@@ -3183,11 +3381,11 @@ exports.createDom = createDom;
  * @param message
  */
 var sendDom = function (messageList) { return __awaiter(void 0, void 0, void 0, function () {
-    var newList, domStr, socketObject_1, text, e_3;
+    var newList, domStr, socketObject_1, typeYomiko, text, e_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 9, , 10]);
+                _a.trys.push([0, 12, , 13]);
                 newList = util_1.judgeAaMessage(messageList);
                 domStr = newList.map(function (message) { return exports.createDom(message, 'server', message.isAA); }).join('\n');
                 socketObject_1 = {
@@ -3201,19 +3399,29 @@ var sendDom = function (messageList) { return __awaiter(void 0, void 0, void 0, 
                 }
                 // レンダラーのコメント一覧にも表示
                 sendDomForChatWindow(newList);
-                if (!(config.playSe && globalThis.electron.seList.length > 0)) return [3 /*break*/, 2];
+                if (!(globalThis.electron.seList.length > 0)) return [3 /*break*/, 5];
+                if (!newList.every(function (message) { return message.from === 'stt'; })) return [3 /*break*/, 3];
+                if (!config.playSeStt) return [3 /*break*/, 2];
                 return [4 /*yield*/, playSe()];
             case 1:
                 _a.sent();
                 _a.label = 2;
-            case 2:
-                if (!(globalThis.config.typeYomiko !== 'none')) return [3 /*break*/, 6];
-                if (!(newList[newList.length - 1].isAA && config.aamode.enable)) return [3 /*break*/, 4];
-                return [4 /*yield*/, playYomiko(config.aamode.speakWord)];
+            case 2: return [3 /*break*/, 5];
             case 3:
-                _a.sent();
-                return [3 /*break*/, 6];
+                if (!config.playSe) return [3 /*break*/, 5];
+                return [4 /*yield*/, playSe()];
             case 4:
+                _a.sent();
+                _a.label = 5;
+            case 5:
+                typeYomiko = newList[newList.length - 1].from === 'stt' ? globalThis.config.typeYomikoStt : globalThis.config.typeYomiko;
+                if (!(typeYomiko !== 'none')) return [3 /*break*/, 9];
+                if (!(newList[newList.length - 1].isAA && config.aamode.enable)) return [3 /*break*/, 7];
+                return [4 /*yield*/, playYomiko(typeYomiko, config.aamode.speakWord)];
+            case 6:
+                _a.sent();
+                return [3 /*break*/, 9];
+            case 7:
                 text = newList[newList.length - 1].text.replace(/<br> /g, '\n ').replace(/<br>/g, '\n ');
                 text = text.replace(/<img.*?\/>/g, '');
                 text = text.replace(/<a .*?>/g, '').replace(/<\/a>/g, '');
@@ -3221,25 +3429,25 @@ var sendDom = function (messageList) { return __awaiter(void 0, void 0, void 0, 
                 if (globalThis.config.yomikoReplaceNewline) {
                     text = text.replace(/\r\n/g, ' ').replace(/\n/g, ' ');
                 }
-                return [4 /*yield*/, playYomiko(text)];
-            case 5:
-                _a.sent();
-                _a.label = 6;
-            case 6:
-                if (!(globalThis.config.dispType === 1)) return [3 /*break*/, 8];
-                return [4 /*yield*/, util_1.sleep(globalThis.config.minDisplayTime * 1000)];
-            case 7:
-                _a.sent();
-                _a.label = 8;
+                return [4 /*yield*/, playYomiko(typeYomiko, text)];
             case 8:
+                _a.sent();
+                _a.label = 9;
+            case 9:
+                if (!(globalThis.config.dispType === 1)) return [3 /*break*/, 11];
+                return [4 /*yield*/, util_1.sleep(globalThis.config.minDisplayTime * 1000)];
+            case 10:
+                _a.sent();
+                _a.label = 11;
+            case 11:
                 // 鳴らし終わって読み子が終わった
                 resetInitMessage();
-                return [3 /*break*/, 10];
-            case 9:
+                return [3 /*break*/, 13];
+            case 12:
                 e_3 = _a.sent();
                 electron_log_1.default.error(e_3);
-                return [3 /*break*/, 10];
-            case 10: return [2 /*return*/];
+                return [3 /*break*/, 13];
+            case 13: return [2 /*return*/];
         }
     });
 }); };
