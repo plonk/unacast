@@ -20,6 +20,9 @@ import JpnknFast from './jpnkn';
 import AzureSpeechToText from './azureStt';
 import tr from 'googletrans';
 import CommentIcons from './CommentIcons';
+import iconv from 'iconv-lite';
+import MoeGoe from './moegoe';
+const player = require('node-wav-player')
 
 let app: expressWs.Instance['app'];
 
@@ -28,6 +31,9 @@ let server: http.Server;
 
 /** 棒読みちゃんインスタンス */
 let bouyomi: bouyomiChan;
+
+/** MoeGoeインスタンス */
+let moegoe: MoeGoe;
 
 /** スレッド定期取得実行するか */
 let threadIntervalEvent = false;
@@ -242,6 +248,12 @@ ipcMain.on(electronEvent.START_SERVER, async (event: any, config: typeof globalT
     if (config.bouyomiPort) {
       bouyomi = new bouyomiChan({ port: config.bouyomiPort, volume: config.bouyomiVolume, prefix: config.bouyomiPrefix });
     }
+  }
+
+  // MoeGoe初期化。
+  if (config.typeYomiko === 'moegoe' || config.typeYomikoStt === 'moegoe') {
+    moegoe = new MoeGoe()
+    moegoe.initialize()
   }
 
   // Azure SpeechToText
@@ -744,6 +756,11 @@ const playYomiko = async (typeYomiko: typeof config.typeYomiko, msg: string) => 
     }
     case 'bouyomi': {
       if (bouyomi) bouyomi.speak(msg);
+      break;
+    }
+    case 'moegoe': {
+      moegoe.speakAsync(msg)
+
       break;
     }
   }

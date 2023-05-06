@@ -39,8 +39,10 @@ export const readBoard = async (boardUrl: string) => {
     // const headers: { [key: string]: string } = response.headers;
     // gzipで取得出来たら解凍処理も入れる
 
+log.error(response)
     // UTF-8に変換
     const str = iconv.decode(Buffer.from(response.data), 'Shift_JIS');
+log.error(str)
     // パースして格納
     list.push(
       ...str

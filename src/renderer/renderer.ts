@@ -574,6 +574,9 @@ const loadConfigToLocalStrage = async () => {
     case 'bouyomi':
       (document.getElementById('yomiko_bouyomi') as any).checked = true;
       break;
+    case 'moegoe':
+      (document.getElementById('yomiko_moegoe') as any).checked = true;
+      break;
   }
 
   switch (config.typeYomikoStt) {
@@ -585,6 +588,9 @@ const loadConfigToLocalStrage = async () => {
       break;
     case 'bouyomi':
       (document.getElementById('yomiko_stt_bouyomi') as any).checked = true;
+      break;
+    case 'moegoe':
+      (document.getElementById('yomiko_stt_moegoe') as any).checked = true;
       break;
   }
 

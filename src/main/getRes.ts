@@ -8,7 +8,7 @@ const log = electronlog.scope('bbs');
 
 import { createDom } from './startServer';
 import { judgeAaMessage } from './util';
-import ReadSitaraba, { readBoard as readBoardShitaraba, postRes as postResShitaraba } from './readBBS/readSitaraba'; // したらば読み込み用モジュール
+import ReadSitaraba, { readBoard as readBoardShitaraba, postRes as postResShitaraba } from './readBBS/ReadSitaraba'; // したらば読み込み用モジュール
 import Read5ch, { readBoard as readBoard5ch, postRes as postRes5ch } from './readBBS/Read5ch'; // 5ch互換板読み込み用モジュール
 const sitaraba = new ReadSitaraba();
 const read5ch = new Read5ch();
